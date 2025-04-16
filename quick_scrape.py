@@ -143,7 +143,7 @@ else:
     run_type = 'MORNING RUN'
 
 string = (f"<b>{today_date} - {raw_today_data.strftime('%A').upper()}"
-          "- {run_type} SUMMARY</b>")
+          f"- {run_type} SUMMARY</b>")
 string += '\n\n'
 
 
