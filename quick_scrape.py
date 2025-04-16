@@ -20,12 +20,12 @@ proxy_port = os.environ['PROXY_PORT']
 
 proxy_string = f"{user}:{password}@{proxy_host}:{proxy_port}"
 
-keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen', 
-            'Penandatanganan', 'Penambahan Modal', 'Insidentil', 
-            'Pengambilalihan', 'perubahan -saham', 'luar biasa -iklan', 
-            'PMHMETD', 'negoisasi', 'media massa', 'pengendali', 'penggabungan', 
-            'peningkatan modal', 'kontrak penting', 'restrukturisasi', 
-            'pendirian entitas', 'prospektus', 'tender']
+keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
+            'Penandatanganan', 'Penambahan Modal', 'Insidentil',
+            'Pengambilalihan', 'perubahan -saham', 'luar biasa -iklan',
+            'PMHMETD', 'negoisasi', 'media massa', 'pengendali',
+            'penggabungan', 'peningkatan modal', 'kontrak penting',
+            'restrukturisasi', 'pendirian entitas', 'prospektus', 'tender']
 
 
 # keywords = ['penandatanganan', 'tender']
@@ -58,8 +58,8 @@ if final_df is not None:
     if is_evening:
         final_df = final_df[final_df.time > time(9, 00)].reset_index(drop=True)
 
-    final_df['first_link'] = final_df.apply(lambda x: 
-                                            eval(x['document_links'])[0], 
+    final_df['first_link'] = final_df.apply(lambda x:
+                                            eval(x['document_links'])[0],
                                             axis=1)
     final_df['message_string'] = final_df.apply(
         lambda x: f"•<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')} \
@@ -145,7 +145,8 @@ async def main():
         # Handle potential errors
         print(f"Telegram Error: {e}")
         if "chat not found" in str(e):
-            print("Hint: Make sure the TARGET_CHAT_ID is correct and the user has started a chat with the bot first.")
+            print("Hint: Make sure the TARGET_CHAT_ID is correct and the user \
+                  has started a chat with the bot first.")
         elif "bot was blocked by the user" in str(e):
             print("Hint: The target user has blocked this bot.")
 

@@ -13,8 +13,8 @@ def convert_from_info_div(info_div, keyword):
 
     raw_dt = info_div.time.get_text(strip=True).split('\n\t\t')
 
-    month_map = {'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5, 
-                 'Juni': 6, 'Juli': 7, 'Agustus': 8, 'September': 9, 
+    month_map = {'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5,
+                 'Juni': 6, 'Juli': 7, 'Agustus': 8, 'September': 9,
                  'Oktober': 10, 'November': 11, 'Desember': 12}
 
     today_date = raw_dt[0]
@@ -32,8 +32,8 @@ def convert_from_info_div(info_div, keyword):
     all_link = main_link + lampiran_link
     n_doc = len(all_link)
 
-    result_dict = {'date': today_date, 'time': today_time, 'stock': stock_code, 
-                   'keyword': keyword, 'title': title.split(' [')[0],  
+    result_dict = {'date': today_date, 'time': today_time, 'stock': stock_code,
+                   'keyword': keyword, 'title': title.split(' [')[0],
                    'n_doc': n_doc, 'document_links': str(all_link)}
 
     result_df = pd.DataFrame([result_dict])
@@ -52,12 +52,13 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         today_month_year: The month and year of the date.
 
     Returns:
-        A pandas DataFrame containing the scraped data, 
+        A pandas DataFrame containing the scraped data,
         or None if an error occurs.
     """
 
     try:
-        sb.open("https://www.idx.co.id/id/perusahaan-tercatat/keterbukaan-informasi/")
+        sb.open("https://www.idx.co.id/id/perusahaan-tercatat/\
+                keterbukaan-informasi/")
         sb.sleep(2)
 
         sb.wait_for_element_present('#FilterSearch')
@@ -125,7 +126,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
             if len(raw_info2) > 1:
                 try:
                     current_result = pd.concat(
-                        [convert_from_info_div(x, keyword=keyword) 
+                        [convert_from_info_div(x, keyword=keyword)
                          for x in raw_info2], ignore_index=True)
                 except Exception as e:
                     print(f"Error processing multiple divs for keyword \
@@ -140,7 +141,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
                            '{keyword}': {e}")
                     continue  # Go to the next page
 
-            result_df = pd.concat([result_df, current_result], 
+            result_df = pd.concat([result_df, current_result],
                                   ignore_index=True)
             print("Done Getting data for this keyword")
 
@@ -158,23 +159,22 @@ def truncate_with_ellipsis(text, max_length=100):
 
     Args:
         text: The input string.
-        max_length: The maximum number of characters to keep before appending 
+        max_length: The maximum number of characters to keep before appending
         '...'.
                     Defaults to 100.
 
     Returns:
         The original string if its length is <= max_length, otherwise the
-        truncated string followed by '...'. Returns None if input is not a 
+        truncated string followed by '...'. Returns None if input is not a
         string.
     """
     # Ensure input is a string
     if not isinstance(text, str):
-        # Handle non-string input 
+        # Handle non-string input
         # (e.g., return None, empty string, or raise error)
-        return None 
+        return None
 
     if len(text) > max_length:
-        return text[:max_length] + "..." 
+        return text[:max_length] + "..."
     else:
         return text
-    
