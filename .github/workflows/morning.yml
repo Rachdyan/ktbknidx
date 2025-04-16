@@ -89,5 +89,11 @@ jobs:
         echo "def test_0(sb): pass" > verify_sb.py
         pytest verify_sb.py
     - name: Run python quick_scrape.py --debug
+      env:
+        PROXY_USER: ${{ secrets.PROXY_USER }}
+        PROXY_PASSWORD: ${{ secrets.PROXY_PASSWORD }}
+        PROXY_HOST: ${{ secrets.PROXY_HOST }}
+        PROXY_PORT: ${{ secrets.PROXY_PORT }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       run: |
         python quick_scrape.py --debug
