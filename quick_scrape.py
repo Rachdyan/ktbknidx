@@ -67,25 +67,25 @@ if final_df is not None:
                 {truncate_with_ellipsis(x['title'], 75)}</a>", axis=1)
 
     keyword_summary_result = (
-            final_df.groupby(['date', 'keyword'], as_index=False)
-                .agg(
-                    n_unique_stock=('stock', 'nunique'),
-                    unique_stock=('stock', lambda x: ', '.join(
-                        sorted(x.unique()))),
-                    # n_document=('pdf_name', 'nunique')
-                )
+        final_df.groupby(['date', 'keyword'], as_index=False)
+        .agg(
+            n_unique_stock=('stock', 'nunique'),
+            unique_stock=('stock', lambda x: ', '.join(
+                sorted(x.unique()))),
+            # n_document=('pdf_name', 'nunique')
         )
+    )
 
     date_summary_result = (
-            final_df.groupby(['date'], as_index=False)
-                .agg(
-                    unique_keyword=('keyword', lambda x: ', '.join(
-                        sorted(x.unique()))),
-                    n_unique_stock=('stock', 'nunique'),
-                    unique_stock=('stock', lambda x: ', '.join(
-                        sorted(x.unique()))),
-                    # n_document=('pdf_name', 'nunique')
-                )
+        final_df.groupby(['date'], as_index=False)
+        .agg(
+            unique_keyword=('keyword', lambda x: ', '.join(
+                sorted(x.unique()))),
+            n_unique_stock=('stock', 'nunique'),
+            unique_stock=('stock', lambda x: ', '.join(
+                sorted(x.unique()))),
+            # n_document=('pdf_name', 'nunique')
+        )
         )
 
     avail_keywords = final_df.keyword.unique().tolist()
