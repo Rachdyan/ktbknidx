@@ -57,10 +57,12 @@ def scrape_data(sb, keyword, today_date, today_month_year):
     """
 
     try:
-        sb.open("https://www.idx.co.id/id/perusahaan-tercatat/\
-                keterbukaan-informasi/")
+        sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
+                "/keterbukaan-informasi/")
         sb.sleep(2)
 
+        # html = sb.get_page_source()
+        # print(html)
         sb.wait_for_element_present('#FilterSearch')
         sb.click('#FilterSearch')
         sb.send_keys('#FilterSearch', keyword)

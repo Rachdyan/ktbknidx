@@ -6,12 +6,12 @@ import pandas as pd
 import telegram
 import asyncio
 import os
+# import requests
 from dotenv import load_dotenv
 
 from utils.scraping_utils import scrape_data, truncate_with_ellipsis
 
 load_dotenv()
-
 
 user = os.environ['PROXY_USER']
 password = os.environ['PROXY_PASSWORD']
@@ -19,6 +19,14 @@ proxy_host = os.environ['PROXY_HOST']
 proxy_port = os.environ['PROXY_PORT']
 
 proxy_string = f"{user}:{password}@{proxy_host}:{proxy_port}"
+
+# def internet_connection():
+#    try:
+#        response = requests.get("https://www.idx.co.id/id", timeout=5)
+#        return True
+#    except requests.ConnectionError:
+#        return False
+
 
 keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
             'Penandatanganan', 'Penambahan Modal', 'Insidentil',
@@ -38,7 +46,45 @@ today_month_year = raw_today_data.strftime("%b %Y")
 # today_month_year = 'Apr 2025'
 
 if __name__ == "__main__":
-    with SB(uc=True, headless=True, xvfb=True, proxy=proxy_string) as sb:
+    with SB(uc=True, headless=True, xvfb=True,
+            proxy=proxy_string
+            ) as sb:
+        sb.driver.execute_cdp_cmd(
+                "Network.setExtraHTTPHeaders",
+                {
+                    "headers": {
+                        'Accept': 'text/html,application/xhtml+xml,application\
+                            /xml;q=0.9,image/avif,image/webp,image/apng,*/*;\
+                                q=0.8,application/signed-exchange;v=b3;q=0.7',
+                        'Accept-Encoding': 'gzip, deflate, br, zstd',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Cache-Control': "no-cache",
+                        'Pragma': "no-cache",
+                        'Priority': "u=0, i",
+                        'Sec-Ch-Ua': '"Chromium";v="134", \
+                            "Not:A-Brand";v="24","Google Chrome";v="134"',
+                        'Sec-Ch-Mobile': "?0",
+                        'Sec-Ch-Ua-Platform': '"macOS"',
+                        'Sec-Fetch-Dest': "document",
+                        'Sec-Fetch-Mode': "navigate",
+                        'Sec-Fetch-User': "?1",
+                        'Upgrade-Insecure-Requests': '1',
+                    }
+                }
+            )
+
+        sb.driver.execute_cdp_cmd(
+                "Network.setUserAgentOverride",
+                {
+                    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X \
+                        10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) \
+                            Chrome/134.0.0.0 Safari/537.36"
+                },
+            )
+
+        sb.driver.execute_script("Object.defineProperty(navigator, \
+                                 'webdriver',{get: () => undefined})")
+
         final_df = pd.DataFrame()
         for keyword in keywords:
             print(f"Processing keyword: {keyword}")
@@ -47,7 +93,7 @@ if __name__ == "__main__":
                 final_df = pd.concat([final_df, keyword_df], ignore_index=True)
 
 
-if final_df is not None:
+if (final_df is not None) or (final_df.shape[0] > 0):
     print("Final data is not none")
     is_evening = True if raw_today_data.time() > time(9, 00) else False
     print(f"Is Evening: {is_evening}")
