@@ -78,7 +78,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         if today_month_year != first_calendar_header:
             sb.click("button[class='mx-btn mx-btn-text mx-btn-icon-left']")
 
-        sb.sleep(1)
+        sb.sleep(2)
 
         print("Clicking Date")
         sb.wait_for_element_present(f"td[title = '{today_date}']")
@@ -86,7 +86,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         today_date_button.click()
         today_date_button.click()
 
-        sb.sleep(2)
+        sb.sleep(3)
 
         print("Getting Raw HTML")
         html = sb.get_page_source()
@@ -111,8 +111,8 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         result_df = pd.DataFrame()
         for current_page in range(1, max_page + 1):
-            print(f"Getting data for keyword '{keyword}' from page \
-                   {current_page}")
+            print((f"Getting data for keyword '{keyword}' from page"
+                   "{current_page}"))
 
             if current_page != 1:
                 sb.click("button[class='btn-arrow --next']")

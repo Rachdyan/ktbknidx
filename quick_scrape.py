@@ -47,7 +47,7 @@ today_month_year = raw_today_data.strftime("%b %Y")
 
 if __name__ == "__main__":
     with SB(uc=True, headless=True, xvfb=True,
-            proxy=proxy_string
+            proxy=proxy_string, maximize=True,
             ) as sb:
         sb.driver.execute_cdp_cmd(
                 "Network.setExtraHTTPHeaders",
@@ -108,9 +108,9 @@ if (final_df is not None) or (final_df.shape[0] > 0):
                                             eval(x['document_links'])[0],
                                             axis=1)
     final_df['message_string'] = final_df.apply(
-        lambda x: f"•<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')} \
-            - <a href='{x['first_link']}' target='_blank'>\
-                {truncate_with_ellipsis(x['title'], 75)}</a>", axis=1)
+        lambda x: (f"•<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')}"
+                   f"- <a href='{x['first_link']}' target='_blank'>"
+                   f"{truncate_with_ellipsis(x['title'], 75)}</a>"), axis=1)
 
     keyword_summary_result = (
         final_df.groupby(['date', 'keyword'], as_index=False)
@@ -142,8 +142,8 @@ if is_evening:
 else:
     run_type = 'MORNING RUN'
 
-string = f"<b>{today_date} - {raw_today_data.strftime('%A').upper()} \
-    - {run_type} SUMMARY</b>"
+string = (f"<b>{today_date} - {raw_today_data.strftime('%A').upper()}"
+          "- {run_type} SUMMARY</b>")
 string += '\n\n'
 
 
@@ -191,8 +191,8 @@ async def main():
         # Handle potential errors
         print(f"Telegram Error: {e}")
         if "chat not found" in str(e):
-            print("Hint: Make sure the TARGET_CHAT_ID is correct and the user \
-                  has started a chat with the bot first.")
+            print("Hint: Make sure the TARGET_CHAT_ID is correct and the user"
+                  "has started a chat with the bot first.")
         elif "bot was blocked by the user" in str(e):
             print("Hint: The target user has blocked this bot.")
 
