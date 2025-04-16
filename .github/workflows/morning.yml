@@ -5,6 +5,7 @@ on:
     - cron: '40 1 * * *'
     # At 3:45 PM Jakarta Time (08:45 UTC)
     - cron: '45 8 * * *'
+  workflow_dispatch:
 #  // push:
 #     branches: [ master ]
 #   pull_request:
