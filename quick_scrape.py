@@ -9,7 +9,8 @@ import os
 # import requests
 from dotenv import load_dotenv
 
-from utils.scraping_utils import scrape_data, truncate_with_ellipsis
+from utils.scraping_utils import scrape_data, truncate_with_ellipsis, \
+    get_first_link
 
 load_dotenv()
 
@@ -35,6 +36,7 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
             'penggabungan', 'peningkatan modal', 'kontrak penting',
             'restrukturisasi', 'pendirian entitas', 'prospektus', 'tender']
 
+keywords = ['Pengambilalihan', 'perubahan -saham']
 
 # keywords = ['penandatanganan', 'tender']
 
@@ -105,7 +107,7 @@ if final_df.shape[0] > 0:
         final_df = final_df[final_df.time > time(9, 00)].reset_index(drop=True)
 
     final_df['first_link'] = final_df.apply(lambda x:
-                                            eval(x['document_links'])[0],
+                                            get_first_link(x),
                                             axis=1)
 
     final_df['message_string'] = final_df.apply(

@@ -111,8 +111,8 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         result_df = pd.DataFrame()
         for current_page in range(1, max_page + 1):
-            print((f"Getting data for keyword '{keyword}' from page"
-                   "{current_page}"))
+            print((f"Getting data for keyword '{keyword}' from page "
+                   f"{current_page}"))
 
             if current_page != 1:
                 sb.click("button[class='btn-arrow --next']")
@@ -180,3 +180,12 @@ def truncate_with_ellipsis(text, max_length=100):
         return text[:max_length] + "..."
     else:
         return text
+
+
+def get_first_link(df):
+    try:
+        first_link = eval(df['document_links'])[0]
+    except Exception as e:
+        print(f"Error getting first link.. {e}")
+        first_link = ''
+    return first_link
