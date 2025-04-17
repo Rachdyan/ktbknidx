@@ -93,7 +93,7 @@ if __name__ == "__main__":
                 final_df = pd.concat([final_df, keyword_df], ignore_index=True)
 
 
-if (final_df is not None) or (final_df.shape[0] > 0):
+if final_df.shape[0] > 0:
     print("Final data is not none")
     is_evening = True if raw_today_data.time() > time(9, 00) else False
     print(f"Is Evening: {is_evening}")
@@ -107,6 +107,8 @@ if (final_df is not None) or (final_df.shape[0] > 0):
     final_df['first_link'] = final_df.apply(lambda x:
                                             eval(x['document_links'])[0],
                                             axis=1)
+    
+
     final_df['message_string'] = final_df.apply(
         lambda x: (f"•<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')}"
                    f"- <a href='{x['first_link']}' target='_blank'>"
@@ -147,7 +149,7 @@ string = (f"<b>{today_date} - {raw_today_data.strftime('%A').upper()}"
 string += '\n\n'
 
 
-if final_df is not None:
+if final_df.shape[0] > 0:
     string += f'n stock: {date_summary_result.n_unique_stock[0]}'
     # string += '\n'
     # string += date_summary_result.unique_stock[0]
