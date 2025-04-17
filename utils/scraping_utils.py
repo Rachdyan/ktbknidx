@@ -189,3 +189,15 @@ def get_first_link(df):
         print(f"Error getting first link for {df['stock']} {e}")
         first_link = ''
     return first_link
+
+
+def generate_message_string(df):
+    try:
+        msg_string = (f"•<b>{df['stock']}</b> - {df['time'].strftime('%H:%M')}"
+                      f"- <a href='{df['first_link']}' target='_blank'>"
+                      f"{truncate_with_ellipsis(df['title'], 75)}</a>")
+    except Exception as e:
+        print(f"Error getting message string for {df['stock']} {e}")
+        msg_string = (f"•<b>{df['stock']}</b> - {df['time'].strftime('%H:%M')}"
+                      f"{truncate_with_ellipsis(df['title'], 75)}")
+    return msg_string

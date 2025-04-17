@@ -103,13 +103,15 @@ if final_df.shape[0] > 0:
     final_df['time'] = pd.to_datetime(final_df['time'], format='%H:%M:%S')\
         .dt.time
 
-    if is_evening:
-        final_df = final_df[final_df.time > time(9, 00)].reset_index(drop=True)
+    # if is_evening:
+    #    final_df = final_df[final_df.time > time(9, 00)].\
+    # reset_index(drop=True)
 
     final_df['first_link'] = final_df.apply(lambda x:
                                             get_first_link(x),
                                             axis=1)
     print(final_df.to_dict('list'))
+    
     final_df['message_string'] = final_df.apply(
         lambda x: (f"•<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')}"
                    f"- <a href='{x['first_link']}' target='_blank'>"
