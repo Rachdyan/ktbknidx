@@ -186,6 +186,6 @@ def get_first_link(df):
     try:
         first_link = eval(df['document_links'])[0]
     except Exception as e:
-        print(f"Error getting first link.. {e}")
+        print(f"Error getting first link for {df['stock']} {e}")
         first_link = ''
     return first_link
