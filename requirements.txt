@@ -1,4 +1,6 @@
 beautifulsoup4
+html5lib
+lxml
 pandas==2.2.3
 python-dotenv==1.1.0
 python-telegram-bot==22.0
