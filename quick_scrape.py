@@ -107,7 +107,6 @@ if final_df.shape[0] > 0:
     final_df['first_link'] = final_df.apply(lambda x:
                                             eval(x['document_links'])[0],
                                             axis=1)
-    
 
     final_df['message_string'] = final_df.apply(
         lambda x: (f"•<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')}"
