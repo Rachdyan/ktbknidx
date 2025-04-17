@@ -101,10 +101,10 @@ if final_df.shape[0] > 0:
     final_df['time'] = pd.to_datetime(final_df['time'], format='%H:%M:%S')\
         .dt.time
 
-    if raw_today_data.time() < time(9, 00):
+    if raw_today_data.time() < time(10, 00):
         run_time_type = 'Morning'
-    elif raw_today_data.time() > time(9, 00) and \
-            raw_today_data.time() < time(13, 15):
+    elif raw_today_data.time() > time(10, 00) and \
+            raw_today_data.time() < time(14, 00):
         run_time_type = 'Afternoon'
         final_df = final_df[final_df.time > time(8, 45)].\
             reset_index(drop=True)
