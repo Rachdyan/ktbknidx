@@ -31,10 +31,11 @@ proxy_string = f"{user}:{password}@{proxy_host}:{proxy_port}"
 
 keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
             'Penandatanganan', 'Penambahan Modal', 'Insidentil',
-            'Pengambilalihan', 'perubahan -saham', 'luar biasa -iklan',
-            'PMHMETD', 'negoisasi', 'media massa', 'pengendali',
-            'penggabungan', 'peningkatan modal', 'kontrak penting',
-            'restrukturisasi', 'pendirian entitas', 'prospektus', 'tender']
+            'Pengambilalihan', 'perubahan  -kepemilikan -audit',
+            'luar biasa -iklan', 'PMHMETD', 'negoisasi', 'media massa',
+            'pengendali', 'penggabungan', 'peningkatan modal',
+            'kontrak penting', 'restrukturisasi', 'pendirian entitas',
+            'prospektus', 'tender']
 
 # keywords = ['Pengambilalihan', 'perubahan -saham']
 
