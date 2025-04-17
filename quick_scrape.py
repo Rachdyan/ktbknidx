@@ -36,7 +36,7 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
             'penggabungan', 'peningkatan modal', 'kontrak penting',
             'restrukturisasi', 'pendirian entitas', 'prospektus', 'tender']
 
-keywords = ['Pengambilalihan', 'perubahan -saham']
+# keywords = ['Pengambilalihan', 'perubahan -saham']
 
 # keywords = ['penandatanganan', 'tender']
 
@@ -97,15 +97,21 @@ if __name__ == "__main__":
 
 if final_df.shape[0] > 0:
     print("Final data is not none")
-    is_evening = True if raw_today_data.time() > time(9, 00) else False
-    print(f"Is Evening: {is_evening}")
 
     final_df['time'] = pd.to_datetime(final_df['time'], format='%H:%M:%S')\
         .dt.time
 
-    # if is_evening:
-    #    final_df = final_df[final_df.time > time(9, 00)].\
-    # reset_index(drop=True)
+    if raw_today_data.time() < time(9, 00):
+        run_time_type = 'Morning'
+    elif raw_today_data.time() > time(9, 00) and \
+            raw_today_data.time() < time(13, 15):
+        run_time_type = 'Afternoon'
+        final_df = final_df[final_df.time > time(8, 45)].\
+            reset_index(drop=True)
+    else:
+        run_time_type = 'Evening'
+        final_df = final_df[final_df.time > time(13, 15)].\
+            reset_index(drop=True)
 
     final_df['first_link'] = final_df.apply(lambda x:
                                             get_first_link(x),
@@ -140,13 +146,8 @@ if final_df.shape[0] > 0:
     avail_keywords = final_df.keyword.unique().tolist()
 
 
-if is_evening:
-    run_type = 'EVENING RUN'
-else:
-    run_type = 'MORNING RUN'
-
 string = (f"<b>{today_date} - {raw_today_data.strftime('%A').upper()}"
-          f"- {run_type} SUMMARY</b>")
+          f"- {run_time_type.upper()} RUN SUMMARY</b>")
 string += '\n\n'
 
 
