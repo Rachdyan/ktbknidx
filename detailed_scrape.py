@@ -30,7 +30,7 @@ proxy_port = os.environ['PROXY_PORT']
 proxy_string = f"{user}:{password}@{proxy_host}:{proxy_port}"
 
 private_key_id = os.environ['SA_PRIVKEY_ID']
-sa_client_email = os.environ['SA_CLIENTEMAIL']
+sa_client_email = os.environ['SA_CLIENTMAIL']
 sa_client_x509_url = os.environ['SA_CLIENT_X509_URL']
 
 
