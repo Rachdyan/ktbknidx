@@ -132,10 +132,10 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
 
 raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
 today_date = raw_today_data.strftime("%Y-%m-%d")
-today_date = '2025-04-18'
+# today_date = '2025-04-19'
 
 today_month_year = raw_today_data.strftime("%b %Y")
-today_month_year = 'Apr 2025'
+# today_month_year = 'Apr 2025'
 
 if __name__ == "__main__":
     with SB(uc=True, headless=True, xvfb=True,
@@ -349,3 +349,32 @@ if (final_df is not None and final_df.shape[0] > 0):
 
 else:
     print(f"No result for {today_date}")
+    summary_string = (f"<b>{raw_today_data.strftime('%A').upper()}"
+                      f" - {today_date} - "
+                      f"{raw_today_data.strftime('%H:%M')}"
+                      f" -  DAILY RUN SUMMARY</b>")
+    summary_string += '\n\n'
+    summary_string += 'No Results'
+
+    async def main():
+        try:
+            # Create a bot instance
+            bot = telegram.Bot(token=BOT_TOKEN)
+            print(f"Attempting to send message to chat ID: {TARGET_CHAT_ID}")
+
+            await bot.send_message(
+                chat_id=TARGET_CHAT_ID,
+                text=summary_string,
+                parse_mode='HTML'
+            )
+            print("Message sent successfully!")
+
+        except telegram.error.TelegramError as e:
+            # Handle potential errors
+            print(f"Telegram Error: {e}")
+            if "chat not found" in str(e):
+                print("Hint: Make sure the TARGET_CHAT_ID is correct")
+            elif "bot was blocked by the user" in str(e):
+                print("Hint: The target user has blocked this bot.")
+
+        asyncio.run(main())
