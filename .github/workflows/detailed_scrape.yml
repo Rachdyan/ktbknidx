@@ -1,4 +1,4 @@
-name: Quick Scrape
+name: Detailed Scrape
 on:
   schedule:
     # At 11:00 PM Jakarta Time (08:45 UTC)
