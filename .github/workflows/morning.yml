@@ -50,7 +50,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade pip
         pip install --upgrade wheel
-        pip install -r requirements.txt
+        pip install -r requirements_quick.txt
         pip install --upgrade pyautogui
     - name: Install extra dependencies
       if: runner.os == 'Linux'

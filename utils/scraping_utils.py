@@ -4,7 +4,13 @@ import pandas as pd
 
 
 def convert_from_info_div(info_div, keyword):
-    stock_code = info_div.h6.span.get_text(strip=True)
+
+    try:
+        stock_code = info_div.h6.span.get_text(strip=True)
+    except Exception as e:
+        print(f"No Stock Code Available because of {e}")
+        stock_code = ''
+
     title = info_div.h6.get_text(strip=True)
     title = title.replace("/", " ")
 
@@ -13,9 +19,10 @@ def convert_from_info_div(info_div, keyword):
 
     raw_dt = info_div.time.get_text(strip=True).split('\n\t\t')
 
-    month_map = {'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5,
-                 'Juni': 6, 'Juli': 7, 'Agustus': 8, 'September': 9,
-                 'Oktober': 10, 'November': 11, 'Desember': 12}
+    month_map = {'Januari': '01', 'Februari': '02', 'Maret': '03',
+                 'April': '04', 'Mei': '05', 'Juni': '06',
+                 'Juli': '07', 'Agustus': '08', 'September': '9',
+                 'Oktober': '10', 'November': '11', 'Desember': '12'}
 
     today_date = raw_dt[0]
     today_time = raw_dt[1]
@@ -68,6 +75,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         sb.send_keys('#FilterSearch', keyword)
 
         sb.sleep(1)
+        sb.wait_for_element_present("input[name='date']")
         sb.click("input[name='date']")
         sb.sleep(1)
 

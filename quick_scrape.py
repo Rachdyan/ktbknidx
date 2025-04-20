@@ -96,21 +96,29 @@ if __name__ == "__main__":
                 final_df = pd.concat([final_df, keyword_df], ignore_index=True)
 
 
-if final_df.shape[0] > 0:
+if raw_today_data.time() < time(10, 00):
+    run_time_type = 'Morning'
+elif raw_today_data.time() > time(10, 00) and \
+     raw_today_data.time() < time(14, 00):
+    run_time_type = 'Afternoon'
+
+else:
+    run_time_type = 'Evening'
+
+
+if final_df.shape[0] > 0 and final_df is not None:
     print("Final data is not none")
 
     final_df['time'] = pd.to_datetime(final_df['time'], format='%H:%M:%S')\
         .dt.time
 
     if raw_today_data.time() < time(10, 00):
-        run_time_type = 'Morning'
+        final_df = final_df
     elif raw_today_data.time() > time(10, 00) and \
             raw_today_data.time() < time(14, 00):
-        run_time_type = 'Afternoon'
         final_df = final_df[final_df.time > time(8, 45)].\
             reset_index(drop=True)
     else:
-        run_time_type = 'Evening'
         final_df = final_df[final_df.time > time(13, 15)].\
             reset_index(drop=True)
 
@@ -152,7 +160,7 @@ string = (f"<b>{today_date} - {raw_today_data.strftime('%A').upper()}"
 string += '\n\n'
 
 
-if final_df.shape[0] > 0:
+if final_df.shape[0] > 0 and final_df is not None:
     string += f'n stock: {date_summary_result.n_unique_stock[0]}'
     # string += '\n'
     # string += date_summary_result.unique_stock[0]
