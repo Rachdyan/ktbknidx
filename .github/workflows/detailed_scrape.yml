@@ -93,5 +93,10 @@ jobs:
         PROXY_HOST: ${{ secrets.PROXY_HOST }}
         PROXY_PORT: ${{ secrets.PROXY_PORT }}
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        SA_PRIVKEY_ID: ${{ secrets.SA_PRIVKEY_ID }}
+        SA_PRIVKEY: ${{ secrets.SA_PRIVKEY }}
+        SA_CLIENTMAIL: ${{ secrets.SA_CLIENTMAIL }}
+        SA_CLIENT_X509_URL: ${{ secrets.SA_CLIENT_X509_URL }}
+        DEEPSEEK_APIKEY: ${{ secrets.DEEPSEEK_APIKEY }}
       run: |
         python detailed_scrape.py --debug
