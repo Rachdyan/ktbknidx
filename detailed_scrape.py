@@ -80,7 +80,7 @@ drive = GoogleDrive(gauth)
 parent_folder_id = '1_jCMdbv409mtEYTu8JyGW_cmSzezZ-7r'
 
 # Authenticate Deepseek
-deepseek_api_key = 'sk-893b845a9ffd48888f755541121752cb'
+deepseek_api_key = os.environ['DEEPSEEK_APIKEY']
 client = OpenAI(
         api_key=deepseek_api_key,
         base_url="https://api.deepseek.com"
