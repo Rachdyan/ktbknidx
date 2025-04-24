@@ -46,7 +46,7 @@ def upload_pdf_and_generate_summary(sb, df, drive, parent_folder_id,
         # sb.activate_cdp_mode()
         sb.uc_open(link)
 
-        sb.assert_downloaded_file(filename)
+        sb.assert_downloaded_file(filename, timeout=60)
 
         downloaded_filepath = sb.get_path_of_downloaded_file(filename)
         current_pdf = fitz.open(downloaded_filepath)
