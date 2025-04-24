@@ -34,31 +34,66 @@ def upload_pdf_and_generate_summary(sb, df, drive, parent_folder_id,
 
     text_content = ""
     combined_pdf = fitz.open()
+    success_flag = False  # Track if at least 1 file downloaded
 
     for i in range(0, len(all_links)):
         link = all_links[i]
         filename = all_filenames[i]
+        downloaded = False
 
-        print(f"Downloading {link}")
-        # sb.download_file(link)
-        # sb.uc_open_with_disconnect(link, timeout = 10)
-        # sb.uc_open_with_reconnect(link, reconnect_time = 5)
-        # sb.activate_cdp_mode()
-        sb.uc_open(link)
+        try:
+            print(f"Downloading {link}")
+            sb.uc_open(link)
+            sb.assert_downloaded_file(filename, timeout=60)
+            downloaded = True
+            success_flag = True  # Mark success if downloaded
+        except Exception as e:
+            print(f"⚠️ Failed to download {filename}: {str(e)}")
+            sb.delete_downloaded_file_if_present(filename)  # Clean up
+            continue  # Skip to next file
 
-        sb.assert_downloaded_file(filename, timeout=60)
+        if downloaded:
+            try:
+                downloaded_filepath = sb.get_path_of_downloaded_file(filename)
+                current_pdf = fitz.open(downloaded_filepath)
+                # Process text content
+                for page in current_pdf:
+                    if len(text_content) < 62000:
+                        text_content += page.get_text("text")
+                # Add to combined PDF
+                combined_pdf.insert_pdf(current_pdf)
+            finally:
+                sb.delete_downloaded_file_if_present(filename)
 
-        downloaded_filepath = sb.get_path_of_downloaded_file(filename)
-        current_pdf = fitz.open(downloaded_filepath)
-        for page in current_pdf:
-            if len(text_content) < 62000:
-                text_content += page.get_text("text")
+    # Return None if all downloads failed
+    if not success_flag:
+        print("❌ All downloads failed. Returning None.")
+        combined_pdf.close()
+        df['drive_link'] = 'Failed Downloading PDF'
+        df['summary'] = 'Failed Downloading PDF'
+        return df
 
-        combined_pdf.insert_pdf(current_pdf)
+    # Save combined PDF only if content exists
+    if combined_pdf.page_count > 0:
+        combined_pdf.save(full_combined_pdf_path)
+        combined_pdf.close()
+    else:
+        print("❌ No valid PDF content. Returning None.")
+        combined_pdf.close()
+        df['drive_link'] = 'Failed Downloading PDF'
+        df['summary'] = 'Failed Downloading PDF'
+        return df
+    #     downloaded_filepath = sb.get_path_of_downloaded_file(filename)
+    #     current_pdf = fitz.open(downloaded_filepath)
+    #     for page in current_pdf:
+    #         if len(text_content) < 62000:
+    #             text_content += page.get_text("text")
 
-        sb.delete_downloaded_file_if_present(filename)
+    #     combined_pdf.insert_pdf(current_pdf)
 
-    combined_pdf.save(full_combined_pdf_path)
+    #     sb.delete_downloaded_file_if_present(filename)
+
+    # combined_pdf.save(full_combined_pdf_path)
 
     # Upload to Drive
 
