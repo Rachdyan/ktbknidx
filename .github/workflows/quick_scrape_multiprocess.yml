@@ -1,10 +1,10 @@
-name: Quick Scrape
+name: Quick Scrape Multi
 on:
   schedule:
     # At 8:40 AM Jakarta Time (01:40 UTC)
-    # - cron: '40 1 * * *'
+    - cron: '40 1 * * *'
     # At 1:15 PM Jakarta Time (06:15 UTC)
-    # - cron: '15 6 * * *'
+    - cron: '15 6 * * *'
     # At 3:45 PM Jakarta Time (08:45 UTC)
     - cron: '45 8 * * *'
   workflow_dispatch:
