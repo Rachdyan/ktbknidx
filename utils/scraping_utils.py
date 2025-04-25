@@ -64,6 +64,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
     """
 
     try:
+        print(f"Scraping {keyword}....")
         sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
                 "/keterbukaan-informasi/")
         sb.sleep(2)
