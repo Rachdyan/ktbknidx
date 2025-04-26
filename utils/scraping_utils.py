@@ -1,4 +1,4 @@
-
+from seleniumbase import SB
 from bs4 import BeautifulSoup
 import pandas as pd
 
@@ -210,3 +210,47 @@ def generate_message_string(df):
         msg_string = (f"•<b>{df['stock']}</b> - {df['time'].strftime('%H:%M')}"
                       f"{truncate_with_ellipsis(df['title'], 75)}")
     return msg_string
+
+
+def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
+    """Process a single keyword in its own browser instance"""
+    with SB(uc=True, headless=True, xvfb=True,
+            proxy=proxy_string,
+            maximize=True) as sb:
+        # Set up headers and user agent
+        sb.driver.execute_cdp_cmd(
+                "Network.setExtraHTTPHeaders",
+                {
+                    "headers": {
+                        'Accept': 'text/html,application/xhtml+xml,application\
+                            /xml;q=0.9,image/avif,image/webp,image/apng,*/*;\
+                                q=0.8,application/signed-exchange;v=b3;q=0.7',
+                        'Accept-Encoding': 'gzip, deflate, br, zstd',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Cache-Control': "no-cache",
+                        'Pragma': "no-cache",
+                        'Priority': "u=0, i",
+                        'Sec-Ch-Ua': '"Chromium";v="134", \
+                            "Not:A-Brand";v="24","Google Chrome";v="134"',
+                        'Sec-Ch-Mobile': "?0",
+                        'Sec-Ch-Ua-Platform': '"macOS"',
+                        'Sec-Fetch-Dest': "document",
+                        'Sec-Fetch-Mode': "navigate",
+                        'Sec-Fetch-User': "?1",
+                        'Upgrade-Insecure-Requests': '1',
+                    }
+                }
+            )
+
+        sb.driver.execute_cdp_cmd(
+                "Network.setUserAgentOverride",
+                {
+                    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X \
+                        10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) \
+                            Chrome/134.0.0.0 Safari/537.36"
+                },
+            )
+        sb.driver.execute_script("Object.defineProperty(navigator, \
+                                 'webdriver',{get: () => undefined})")
+
+        return scrape_data(sb, keyword, today_date, today_month_year)

@@ -1,4 +1,4 @@
-from seleniumbase import SB
+# from seleniumbase import SB
 import pytz
 from datetime import datetime as dt
 from datetime import time
@@ -8,12 +8,12 @@ import asyncio
 import os
 import multiprocessing
 
-from utils.scraping_utils import scrape_data, truncate_with_ellipsis, \
-    get_first_link
+from utils.scraping_utils import process_keyword_multi, \
+    get_first_link, generate_message_string
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Environment variables setup
 user = os.environ['PROXY_USER']
@@ -30,50 +30,6 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
             'kontrak penting', 'restrukturisasi', 'pendirian entitas',
             'prospektus', 'tender']
 
-
-def process_keyword(keyword, today_date, today_month_year, proxy_string):
-    """Process a single keyword in its own browser instance"""
-    with SB(uc=True, headless=True, xvfb=True,
-            proxy=proxy_string, maximize=True) as sb:
-        # Set up headers and user agent
-        sb.driver.execute_cdp_cmd(
-                "Network.setExtraHTTPHeaders",
-                {
-                    "headers": {
-                        'Accept': 'text/html,application/xhtml+xml,application\
-                            /xml;q=0.9,image/avif,image/webp,image/apng,*/*;\
-                                q=0.8,application/signed-exchange;v=b3;q=0.7',
-                        'Accept-Encoding': 'gzip, deflate, br, zstd',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Cache-Control': "no-cache",
-                        'Pragma': "no-cache",
-                        'Priority': "u=0, i",
-                        'Sec-Ch-Ua': '"Chromium";v="134", \
-                            "Not:A-Brand";v="24","Google Chrome";v="134"',
-                        'Sec-Ch-Mobile': "?0",
-                        'Sec-Ch-Ua-Platform': '"macOS"',
-                        'Sec-Fetch-Dest': "document",
-                        'Sec-Fetch-Mode': "navigate",
-                        'Sec-Fetch-User': "?1",
-                        'Upgrade-Insecure-Requests': '1',
-                    }
-                }
-            )
-
-        sb.driver.execute_cdp_cmd(
-                "Network.setUserAgentOverride",
-                {
-                    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X \
-                        10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) \
-                            Chrome/134.0.0.0 Safari/537.36"
-                },
-            )
-        sb.driver.execute_script("Object.defineProperty(navigator, \
-                                 'webdriver',{get: () => undefined})")
-
-        return scrape_data(sb, keyword, today_date, today_month_year)
-
-
 if __name__ == "__main__":
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
@@ -86,25 +42,34 @@ if __name__ == "__main__":
     # print("procesingg....")
     # Process keywords in parallel
     with multiprocessing.Pool(processes=4) as pool:
-        results = pool.starmap(process_keyword, args)
+        results = pool.starmap(process_keyword_multi, args)
 
     # print("Result:")
     # print(results)
     # Combine results
-    final_df = pd.concat([df for df in results if df is not None],
-                         ignore_index=True)
+    try:
+        final_df = pd.concat([df for df in results if df is not None],
+                             ignore_index=True)
+    except Exception as e:
+        print(e)
+        final_df = None
 
     if raw_today_data.time() < time(10, 00):
         run_time_type = 'Morning'
     elif raw_today_data.time() > time(10, 00) and \
             raw_today_data.time() < time(14, 00):
         run_time_type = 'Afternoon'
-
     else:
         run_time_type = 'Evening'
 
+    string = (f"<b>{today_date} - {raw_today_data.strftime('%A').upper()}"
+              f"- {run_time_type.upper()} RUN SUMMARY</b>")
+    string += '\n\n'
+
+    print(final_df)
+
     if final_df.shape[0] > 0 and final_df is not None:
-        print("Final data is not none")
+        print("Final data is not none before filtering time")
 
         final_df['time'] = pd.to_datetime(final_df['time'], format='%H:%M:%S')\
             .dt.time
@@ -119,61 +84,58 @@ if __name__ == "__main__":
             final_df = final_df[final_df.time > time(13, 15)].\
                 reset_index(drop=True)
 
-        final_df['first_link'] = final_df.apply(lambda x:
-                                                get_first_link(x),
-                                                axis=1)
-        final_df['message_string'] = final_df.apply(
-            lambda x: (f"•<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')}"
-                       f"- <a href='{x['first_link']}' target='_blank'>"
-                       f"{truncate_with_ellipsis(x['title'], 75)}</a>"),
-            axis=1)
+        if final_df.shape[0] > 0 and final_df is not None:
+            final_df['first_link'] = final_df.apply(lambda x:
+                                                    get_first_link(x),
+                                                    axis=1)
 
-        keyword_summary_result = (
-            final_df.groupby(['date', 'keyword'], as_index=False)
-            .agg(
-                n_unique_stock=('stock', 'nunique'),
-                unique_stock=('stock', lambda x: ', '.join(
-                    sorted(x.unique()))),
-                # n_document=('pdf_name', 'nunique')
-            )
-        )
+            final_df['message_string'] = final_df.apply(
+                lambda x: generate_message_string(x),
+                axis=1)
 
-        date_summary_result = (
-            final_df.groupby(['date'], as_index=False)
-            .agg(
-                unique_keyword=('keyword', lambda x: ', '.join(
-                    sorted(x.unique()))),
-                n_unique_stock=('stock', 'nunique'),
-                unique_stock=('stock', lambda x: ', '.join(
-                    sorted(x.unique()))),
-                # n_document=('pdf_name', 'nunique')
-            )
+            keyword_summary_result = (
+                final_df.groupby(['date', 'keyword'], as_index=False)
+                .agg(
+                    n_unique_stock=('stock', 'nunique'),
+                    unique_stock=('stock', lambda x: ', '.join(
+                        sorted(x.unique()))),
+                    # n_document=('pdf_name', 'nunique')
+                )
             )
 
-        avail_keywords = final_df.keyword.unique().tolist()
+            date_summary_result = (
+                final_df.groupby(['date'], as_index=False)
+                .agg(
+                    unique_keyword=('keyword', lambda x: ', '.join(
+                        sorted(x.unique()))),
+                    n_unique_stock=('stock', 'nunique'),
+                    unique_stock=('stock', lambda x: ', '.join(
+                        sorted(x.unique()))),
+                    # n_document=('pdf_name', 'nunique')
+                )
+                )
 
-    string = (f"<b>{today_date} - {raw_today_data.strftime('%A').upper()}"
-              f"- {run_time_type.upper()} RUN SUMMARY</b>")
-    string += '\n\n'
+            avail_keywords = final_df.keyword.unique().tolist()
 
-    if final_df.shape[0] > 0 and final_df is not None:
-        string += f'n stock: {date_summary_result.n_unique_stock[0]}'
-        # string += '\n'
-        # string += date_summary_result.unique_stock[0]
-        string += '\n'
-
-        avail_keywords = final_df.keyword.unique().tolist()
-        for keyword in avail_keywords:
-            string += '\n'
-            string += f'<b>{keyword}</b>:'
+            string += f'n stock: {date_summary_result.n_unique_stock[0]}'
+            # string += '\n'
+            # string += date_summary_result.unique_stock[0]
             string += '\n'
 
-            keyword_df = final_df[final_df.keyword == keyword]\
-                .reset_index(drop=True)
-            print(keyword_df)
-            for i in range(0, keyword_df.shape[0]):
-                string += keyword_df.message_string[i]
+            avail_keywords = final_df.keyword.unique().tolist()
+            for keyword in avail_keywords:
                 string += '\n'
+                string += f'<b>{keyword}</b>:'
+                string += '\n'
+
+                keyword_df = final_df[final_df.keyword == keyword]\
+                    .reset_index(drop=True)
+                print(keyword_df)
+                for i in range(0, keyword_df.shape[0]):
+                    string += keyword_df.message_string[i]
+                    string += '\n'
+        else:
+            string += 'No Result Available'
     else:
         string += 'No Result Available'
 

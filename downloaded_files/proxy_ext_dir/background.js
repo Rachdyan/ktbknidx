@@ -3,8 +3,8 @@ var config = {
     rules: {
       singleProxy: {
         scheme: "http",
-        host: "101.46.143.37",
-        port: parseInt("6280")
+        host: "177.54.154.87",
+        port: parseInt("823")
       },
     bypassList: [""]
     }
@@ -13,8 +13,8 @@ chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
 function callbackFn(details) {
     return {
         authCredentials: {
-            username: "rayproxy-zone-custom-region-ID",
-            password: "rayproxy"
+            username: "379541450e973763ba37",
+            password: "3836f73bbe948bb9"
         }
     };
 }
