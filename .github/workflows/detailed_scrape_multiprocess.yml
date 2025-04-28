@@ -99,4 +99,4 @@ jobs:
         SA_CLIENT_X509_URL: ${{ secrets.SA_CLIENT_X509_URL }}
         DEEPSEEK_APIKEY: ${{ secrets.DEEPSEEK_APIKEY }}
       run: |
-        python detailed_scrape.py --debug
+        python detailed_scrape_multi.py --debug
