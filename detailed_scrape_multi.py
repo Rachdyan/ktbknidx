@@ -132,7 +132,7 @@ if __name__ == "__main__":
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
     today_date = raw_today_data.strftime("%Y-%m-%d")
-    today_date = '2025-04-27'
+    today_date = '2025-04-28'
     today_month_year = raw_today_data.strftime("%b %Y")
     today_month_year = 'Apr 2025'
 
@@ -290,25 +290,67 @@ if __name__ == "__main__":
         summary_string += '\n\n'
         summary_string += 'No Results'
 
-    async def main():
-        try:
-            # Create a bot instance
-            bot = telegram.Bot(token=BOT_TOKEN)
-            print(f"Attempting to send message to chat ID: {TARGET_CHAT_ID}")
+        async def send_no_results_notification():
+            try:
+                # Create a bot instance
+                bot = telegram.Bot(token=BOT_TOKEN)
+                print(
+                    f"Attempting to send message to chat ID: {TARGET_CHAT_ID}")
 
-            await bot.send_message(
-                chat_id=TARGET_CHAT_ID,
-                text=summary_string,
-                parse_mode='HTML'
-            )
-            print("Message sent successfully!")
+                await bot.send_message(
+                    chat_id=TARGET_CHAT_ID,
+                    text=summary_string,
+                    parse_mode='HTML'
+                )
+                print("Message sent successfully!")
 
-        except telegram.error.TelegramError as e:
-            # Handle potential errors
-            print(f"Telegram Error: {e}")
-            if "chat not found" in str(e):
-                print("Hint: Make sure the TARGET_CHAT_ID is correct")
-            elif "bot was blocked by the user" in str(e):
-                print("Hint: The target user has blocked this bot.")
+            except telegram.error.TelegramError as e:
+                # Handle potential errors
+                print(f"Telegram Error: {e}")
+                if "chat not found" in str(e):
+                    print("Hint: Make sure the TARGET_CHAT_ID is correct")
+                elif "bot was blocked by the user" in str(e):
+                    print("Hint: The target user has blocked this bot.")
 
-        asyncio.run(main())
+        asyncio.run(send_no_results_notification())
+
+        result_dict = {'date': dt.strptime(today_date, '%Y-%m-%d').
+                       strftime("%d-%m-%Y"),
+                       'time': '', 'stock': 'No Result', 'keyword': '',
+                       'title': '', 'n_doc': 'No Result', 'document_links': '',
+                       'pdf_name': '', 'drive_link': '', 'summary': ''}
+        final_processed_df = pd.DataFrame([result_dict])
+
+        keyword_summary_result = (
+            final_processed_df.groupby(['date', 'keyword'], as_index=False)
+            .agg(
+                    n_unique_stock=('stock', 'nunique'),
+                    unique_stock=('stock',
+                                  lambda x: ', '.join(sorted(x.unique()))),
+                    n_document=('pdf_name', 'nunique')
+                )
+        )
+
+        date_summary_result = (
+            final_processed_df.groupby(['date'], as_index=False)
+            .agg(
+                unique_keyword=('keyword', lambda x: ', '
+                                .join(sorted(x.unique()))),
+                n_unique_stock=('stock', 'nunique'),
+                unique_stock=('stock',
+                              lambda x: ', '.join(sorted(x.unique()))),
+                n_document=('pdf_name', 'nunique')
+                )
+        )
+
+        print("Updating Google Sheet..")
+        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Data',
+                         df=final_processed_df, mode='a')
+
+        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Date Summary',
+                         df=date_summary_result, mode='a')
+
+        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Keyword Summary',
+                         df=keyword_summary_result, mode='a')
+
+        print("Finished Updating Sheet")
