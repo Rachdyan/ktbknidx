@@ -1,3 +1,5 @@
 .env
 test.py
 notebook_test
+downloaded_files
+detailed_scrape_multi.py
