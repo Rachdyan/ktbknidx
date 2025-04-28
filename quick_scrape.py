@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from utils.scraping_utils import scrape_data, truncate_with_ellipsis, \
     get_first_link
 
-load_dotenv()
+load_dotenv(override=True)
 
 user = os.environ['PROXY_USER']
 password = os.environ['PROXY_PASSWORD']
@@ -20,6 +20,8 @@ proxy_host = os.environ['PROXY_HOST']
 proxy_port = os.environ['PROXY_PORT']
 
 proxy_string = f"{user}:{password}@{proxy_host}:{proxy_port}"
+# proxy_string = f"socks5://{user}:{password}@{proxy_host}:{proxy_port}"
+# print(proxy_string)
 
 # def internet_connection():
 #    try:
@@ -49,7 +51,7 @@ today_month_year = raw_today_data.strftime("%b %Y")
 # today_month_year = 'Apr 2025'
 
 if __name__ == "__main__":
-    with SB(uc=True, headless=True, xvfb=True,
+    with SB(uc=True, headless=False, xvfb=True,
             proxy=proxy_string,
             maximize=True,
             ) as sb:
