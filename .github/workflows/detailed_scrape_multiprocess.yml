@@ -1,8 +1,8 @@
 name: Detailed Scrape Multiprocess
 on:
-  #schedule:
+  schedule:
     # At 11:15 PM Jakarta Time (08:45 UTC)
-    #- cron: '15 16 * * *'
+    - cron: '20 16 * * *'
   workflow_dispatch:
 #  // push:
 #     branches: [ master ]
