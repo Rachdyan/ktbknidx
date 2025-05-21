@@ -11,6 +11,7 @@ from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
+from gspread_dataframe import get_as_dataframe
 from openai import OpenAI
 import multiprocessing
 
@@ -125,16 +126,16 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
             'luar biasa -iklan', 'PMHMETD', 'negoisasi', 'media massa',
             'pengendali', 'penggabungan', 'peningkatan modal',
             'kontrak penting', 'restrukturisasi', 'pendirian entitas',
-            'prospektus', 'tender']
+            'prospektus', 'tender', 'anak usaha']
 
 
 if __name__ == "__main__":
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
     today_date = raw_today_data.strftime("%Y-%m-%d")
-    # today_date = '2025-04-28'
+    # today_date = '2025-05-06'
     today_month_year = raw_today_data.strftime("%b %Y")
-    # today_month_year = 'Apr 2025'
+    # today_month_year = 'May 2025'
 
     # Create list of arguments for each keyword
     args = [(keyword, today_date, today_month_year, proxy_string)
@@ -156,9 +157,26 @@ if __name__ == "__main__":
 
     if (final_df is not None and final_df.shape[0] > 0):
         final_df['pdf_name'] = final_df.apply(generate_pdf_name, axis=1)
-        # final_df
+        final_df['identifier'] = final_df.apply(
+            lambda x: f"{x['time']}_{x['pdf_name']}",
+            axis=1)
 
-        rows = [row for _, row in final_df.iterrows()]
+        data_sheet = spreadsheet.worksheet('Data')
+        previous_data_df = get_as_dataframe(data_sheet)
+        previous_data_df = previous_data_df[['date', 'time', 'pdf_name']]
+        previous_data_df['identifier'] = previous_data_df.apply(
+            lambda x: f"{x['time']}_{x['pdf_name']}",
+            axis=1)
+
+        final_df_filtered = final_df[
+            ~final_df.identifier.isin(previous_data_df.identifier.tolist())]
+        final_df_filtered.drop('identifier', axis=1,
+                               inplace=True)
+
+        print(f"There are a total of {final_df_filtered.shape[0]}"
+              " filtered records")
+
+        rows = [row for _, row in final_df_filtered.iterrows()]
         process_args = [(row, proxy_string, service_account_dict,
                          parent_folder_id, scope, deepseek_api_key)
                         for row in rows]

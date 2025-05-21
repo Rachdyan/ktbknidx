@@ -33,7 +33,6 @@ private_key_id = os.environ['SA_PRIVKEY_ID']
 sa_client_email = os.environ['SA_CLIENTMAIL']
 sa_client_x509_url = os.environ['SA_CLIENT_X509_URL']
 
-
 private_key = os.environ['SA_PRIVKEY']
 
 private_key = private_key.replace('\\n', '\n')
@@ -124,7 +123,7 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
             'luar biasa -iklan', 'PMHMETD', 'negoisasi', 'media massa',
             'pengendali', 'penggabungan', 'peningkatan modal',
             'kontrak penting', 'restrukturisasi', 'pendirian entitas',
-            'prospektus', 'tender']
+            'prospektus', 'tender', 'anak usaha']
 
 # keywords = ['Pengambilalihan', 'penandatanganan']
 

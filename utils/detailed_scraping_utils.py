@@ -173,7 +173,8 @@ def upload_pdf_and_generate_summary_multi(row, proxy_string,
                         base_url="https://api.deepseek.com")
 
         with SB(uc=True, headless=True, xvfb=True,
-                proxy=proxy_string, maximize=True, external_pdf=True) as sb:
+                proxy=proxy_string,
+                maximize=True, external_pdf=True) as sb:
             # Configure browser settings
             sb.driver.execute_cdp_cmd(
                     "Network.setExtraHTTPHeaders",
