@@ -158,14 +158,16 @@ if __name__ == "__main__":
     if (final_df is not None and final_df.shape[0] > 0):
         final_df['pdf_name'] = final_df.apply(generate_pdf_name, axis=1)
         final_df['identifier'] = final_df.apply(
-            lambda x: f"{x['time']}_{x['pdf_name']}",
+            # lambda x: f"{x['time']}_{x['pdf_name']}",
+            lambda x: f"{x['pdf_name']}",
             axis=1)
 
         data_sheet = spreadsheet.worksheet('Data')
         previous_data_df = get_as_dataframe(data_sheet)
         previous_data_df = previous_data_df[['date', 'time', 'pdf_name']]
         previous_data_df['identifier'] = previous_data_df.apply(
-            lambda x: f"{x['time']}_{x['pdf_name']}",
+            # lambda x: f"{x['time']}_{x['pdf_name']}",
+            lambda x: f"{x['pdf_name']}",
             axis=1)
 
         final_df_filtered = final_df[
