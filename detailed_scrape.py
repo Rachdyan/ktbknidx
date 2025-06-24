@@ -132,7 +132,7 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
 
 raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
 today_date = raw_today_data.strftime("%Y-%m-%d")
-#today_date = '2025-06-08'
+# today_date = '2025-06-08'
 
 today_month_year = raw_today_data.strftime("%b %Y")
 # today_month_year = 'Apr 2025'
