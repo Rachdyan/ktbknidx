@@ -129,13 +129,16 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
             'prospektus', 'tender', 'anak usaha']
 
 
+# keywords = ['material -sosial', 'HMETD']
+
+
 if __name__ == "__main__":
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
     today_date = raw_today_data.strftime("%Y-%m-%d")
-    # today_date = '2025-05-06'
+    # today_date = '2025-06-20'
     today_month_year = raw_today_data.strftime("%b %Y")
-    # today_month_year = 'May 2025'
+    # today_month_year = 'June 2025'
 
     # Create list of arguments for each keyword
     args = [(keyword, today_date, today_month_year, proxy_string)

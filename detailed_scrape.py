@@ -28,6 +28,7 @@ proxy_host = os.environ['PROXY_HOST']
 proxy_port = os.environ['PROXY_PORT']
 
 proxy_string = f"{user}:{password}@{proxy_host}:{proxy_port}"
+# print(proxy_string)
 
 private_key_id = os.environ['SA_PRIVKEY_ID']
 sa_client_email = os.environ['SA_CLIENTMAIL']
@@ -131,13 +132,13 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
 
 raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
 today_date = raw_today_data.strftime("%Y-%m-%d")
-# today_date = '2025-04-23'
+#today_date = '2025-06-08'
 
 today_month_year = raw_today_data.strftime("%b %Y")
 # today_month_year = 'Apr 2025'
 
 if __name__ == "__main__":
-    with SB(uc=True, headless=True, xvfb=True,
+    with SB(uc=True, headless=False, xvfb=True,
             proxy=proxy_string, maximize=True,
             ) as sb:
         sb.driver.execute_cdp_cmd(
