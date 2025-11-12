@@ -84,6 +84,10 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         first_calendar_header = sb.find_element(
             "div[class='mx-calendar-header']").text
+        # Remove all whitespace variations and normalize
+        first_calendar_header = ' '.join(first_calendar_header.split())
+
+        print(f"Today month year: {today_month_year}")
         print(f"First calendar header: {first_calendar_header}")
 
         if today_month_year != first_calendar_header:
