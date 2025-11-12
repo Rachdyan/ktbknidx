@@ -71,9 +71,9 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         # sb.refresh()
         # sb.sleep(4)
 
-        # max_retries = 3
-        # retry_count = 0
-        # page_loaded = False
+        max_retries = 3
+        retry_count = 0
+        page_loaded = False
 
         while retry_count < max_retries and not page_loaded:
             try:
