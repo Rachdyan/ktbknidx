@@ -65,11 +65,39 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
     try:
         print(f"Scraping {keyword}....")
-        sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
-                "/keterbukaan-informasi/")
-        sb.sleep(2)
-        sb.refresh()
-        sb.sleep(2)
+        # sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
+        #         "/keterbukaan-informasi/")
+        # sb.sleep(4)
+        # sb.refresh()
+        # sb.sleep(4)
+
+        # max_retries = 3
+        # retry_count = 0
+        # page_loaded = False
+
+        while retry_count < max_retries and not page_loaded:
+            try:
+                print(f"Loading page (attempt {retry_count + 1}/{max_retries})...")
+                sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
+                        "/keterbukaan-informasi/")
+                sb.sleep(4)
+                sb.refresh()
+                sb.sleep(4)
+                
+                # Check if page loaded successfully by waiting for a key element
+                sb.wait_for_element_present('#FilterSearch', timeout=10)
+                page_loaded = True
+                print("Page loaded successfully")
+                
+            except Exception as e:
+                retry_count += 1
+                print(f"Failed to load page (attempt {retry_count}/{max_retries}): {e}")
+                if retry_count >= max_retries:
+                    print(f"Max retries reached. Unable to load page for keyword '{keyword}'")
+                    return None
+                sb.sleep(2)  # Wait before retrying
+
+        print("Clicking Search Filter")
 
         # html = sb.get_page_source()
         # print(html)
@@ -77,10 +105,10 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         sb.click('#FilterSearch')
         sb.send_keys('#FilterSearch', keyword)
 
-        sb.sleep(1)
+        sb.sleep(4)
         sb.wait_for_element_present("input[name='date']")
         sb.click("input[name='date']")
-        sb.sleep(1)
+        sb.sleep(4)
 
         first_calendar_header = sb.find_element(
             "div[class='mx-calendar-header']").text
@@ -93,7 +121,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         if today_month_year != first_calendar_header:
             sb.click("button[class='mx-btn mx-btn-text mx-btn-icon-left']")
 
-        sb.sleep(2)
+        sb.sleep(4)
 
         print("Clicking Date")
         sb.wait_for_element_present(f"td[title = '{today_date}']")
@@ -101,7 +129,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         today_date_button.click()
         today_date_button.click()
 
-        sb.sleep(3)
+        sb.sleep(5)
 
         print("Getting Raw HTML")
         html = sb.get_page_source()
