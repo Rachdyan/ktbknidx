@@ -77,23 +77,24 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         while retry_count < max_retries and not page_loaded:
             try:
-                print(f"Loading page (attempt {retry_count + 1}/{max_retries})...")
+                print("Loading page"
+                      f"(attempt {retry_count + 1}/{max_retries})...")
                 sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
                         "/keterbukaan-informasi/")
                 sb.sleep(4)
                 sb.refresh()
                 sb.sleep(4)
-                
-                # Check if page loaded successfully by waiting for a key element
+                # Check if page loaded successfully by waiting for a key
                 sb.wait_for_element_present('#FilterSearch', timeout=10)
                 page_loaded = True
                 print("Page loaded successfully")
-                
             except Exception as e:
                 retry_count += 1
-                print(f"Failed to load page (attempt {retry_count}/{max_retries}): {e}")
+                print("Failed to load page"
+                      f"(attempt {retry_count}/{max_retries}): {e}")
                 if retry_count >= max_retries:
-                    print(f"Max retries reached. Unable to load page for keyword '{keyword}'")
+                    print("Max retries reached. Unable to load page for"
+                          f"keyword '{keyword}'")
                     return None
                 sb.sleep(2)  # Wait before retrying
 
