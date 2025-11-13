@@ -138,7 +138,7 @@ today_month_year = raw_today_data.strftime("%b %Y")
 # today_month_year = 'Apr 2025'
 
 if __name__ == "__main__":
-    with SB(uc=True, headless=True, xvfb=True,
+    with SB(uc=True, headless=False, xvfb=True,
             proxy=proxy_string, maximize=True,
             ) as sb:
         sb.driver.execute_cdp_cmd(
@@ -189,7 +189,8 @@ if (final_df is not None and final_df.shape[0] > 0):
     final_df
     if __name__ == "__main__":
         with SB(uc=True, headless=False, xvfb=True,
-                proxy=proxy_string, maximize=True,
+                proxy=proxy_string,
+                maximize=True,
                 external_pdf=True
                 ) as sb:
             sb.driver.execute_cdp_cmd(

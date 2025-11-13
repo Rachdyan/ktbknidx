@@ -77,28 +77,33 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         while retry_count < max_retries and not page_loaded:
             try:
-                print("Loading page"
+                print(f"{keyword} -- Loading page"
                       f"(attempt {retry_count + 1}/{max_retries})...")
-                sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
-                        "/keterbukaan-informasi/")
-                sb.sleep(4)
+                sb.driver.set_page_load_timeout(60)
+                sb.driver.open("https://www.idx.co.id/id/perusahaan-tercatat"
+                               "/keterbukaan-informasi/")
+
+                # sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
+                #         "/keterbukaan-informasi/")
+
+                sb.sleep(5)
                 sb.refresh()
-                sb.sleep(4)
+                sb.sleep(5)
                 # Check if page loaded successfully by waiting for a key
                 sb.wait_for_element_present('#FilterSearch', timeout=10)
                 page_loaded = True
-                print("Page loaded successfully")
+                print(f"{keyword} -- Page loaded successfully")
             except Exception as e:
                 retry_count += 1
-                print("Failed to load page"
+                print(f"{keyword} -- Failed to load page"
                       f"(attempt {retry_count}/{max_retries}): {e}")
                 if retry_count >= max_retries:
-                    print("Max retries reached. Unable to load page for"
-                          f"keyword '{keyword}'")
+                    print(f"{keyword} -- Max retries reached. Unable to load"
+                          f"page for keyword '{keyword}'")
                     return None
-                sb.sleep(2)  # Wait before retrying
+                sb.sleep(4)  # Wait before retrying
 
-        print("Clicking Search Filter")
+        print(f"{keyword} -- Clicking Search Filter")
 
         # html = sb.get_page_source()
         # print(html)
@@ -106,25 +111,25 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         sb.click('#FilterSearch')
         sb.send_keys('#FilterSearch', keyword)
 
-        sb.sleep(4)
+        sb.sleep(5)
         sb.wait_for_element_present("input[name='date']")
         sb.click("input[name='date']")
-        sb.sleep(4)
+        sb.sleep(5)
 
         first_calendar_header = sb.find_element(
             "div[class='mx-calendar-header']").text
         # Remove all whitespace variations and normalize
         first_calendar_header = ' '.join(first_calendar_header.split())
 
-        print(f"Today month year: {today_month_year}")
-        print(f"First calendar header: {first_calendar_header}")
+        print(f"{keyword} -- Today month year: {today_month_year}")
+        print(f"{keyword} -- First calendar header: {first_calendar_header}")
 
         if today_month_year != first_calendar_header:
             sb.click("button[class='mx-btn mx-btn-text mx-btn-icon-left']")
 
-        sb.sleep(4)
+        sb.sleep(5)
 
-        print("Clicking Date")
+        print(f"{keyword} -- Clicking Date")
         sb.wait_for_element_present(f"td[title = '{today_date}']")
         today_date_button = sb.find_element(f"td[title = '{today_date}']")
         today_date_button.click()
@@ -132,7 +137,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         sb.sleep(5)
 
-        print("Getting Raw HTML")
+        print(f"{keyword} -- Getting Raw HTML")
         html = sb.get_page_source()
         soup = BeautifulSoup(html, 'html5lib')
         disclosure_tab = soup.find("div", class_='disclosure-tab')
@@ -140,10 +145,10 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         pagination_raw = disclosure_tab.find_all('span', recursive=False)[0]\
             .input
         max_page = int(pagination_raw['max'])
-        print(f"Max page is {max_page}")
+        print(f"{keyword} -- Max page is {max_page}")
 
         # Handle potentially incorrect max_page (IDX quirk)
-        if max_page == 58:
+        if max_page > 58:
             sb.sleep(2)
             html = sb.get_page_source()
             soup = BeautifulSoup(html, 'html5lib')
@@ -189,7 +194,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
             result_df = pd.concat([result_df, current_result],
                                   ignore_index=True)
-            print("Done Getting data for this keyword")
+            print(f"{keyword} -- Done Getting data for this keyword")
 
         return result_df
 

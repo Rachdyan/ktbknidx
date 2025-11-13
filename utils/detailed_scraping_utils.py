@@ -44,11 +44,13 @@ def upload_pdf_and_generate_summary(sb, df, drive, parent_folder_id,
     for i in range(0, len(all_links)):
         link = all_links[i]
         filename = all_filenames[i]
+        print(f"Processing file {i+1} of {len(all_links)}: {filename}")
         downloaded = False
 
         try:
             print(f"Downloading {link}")
-            sb.uc_open(link)
+            # sb.uc_open(link)
+            sb.open(link)
             sb.assert_downloaded_file(filename, timeout=60)
             downloaded = True
             success_flag = True  # Mark success if downloaded

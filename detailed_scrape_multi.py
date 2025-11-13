@@ -131,12 +131,11 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
 
 # keywords = ['material -sosial', 'HMETD']
 
-
 if __name__ == "__main__":
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
     today_date = raw_today_data.strftime("%Y-%m-%d")
-    # today_date = '2025-06-20'
+    # today_date = '2025-11-13'
     today_month_year = raw_today_data.strftime("%b %Y")
     # today_month_year = 'June 2025'
 
@@ -144,14 +143,34 @@ if __name__ == "__main__":
     args = [(keyword, today_date, today_month_year, proxy_string)
             for keyword in keywords]
     # print("procesingg....")
+
     # Process keywords in parallel
+    # with multiprocessing.Pool(processes=4) as pool:
+    #     results = pool.starmap(process_keyword_multi, args)
+
     with multiprocessing.Pool(processes=4) as pool:
-        results = pool.starmap(process_keyword_multi, args)
+        async_results = [pool.apply_async(process_keyword_multi, arg)
+                         for arg in args]
+
+        results = []
+        for i, async_result in enumerate(async_results):
+            try:
+                result = async_result.get(timeout=300)
+                results.append(result)
+                print(f"Successfully processed keyword: {keywords[i]}")
+            except multiprocessing.TimeoutError:
+                print(f"Timeout: Keyword '{keywords[i]}' took too long"
+                      " - skipping")
+            except Exception as e:
+                print(f"Error processing keyword '{keywords[i]}': {e}")
+
+    print("Processing completed.")
 
     # print("Result:")
     # print(results)
     # Combine results
     try:
+        print("Combining results...")
         final_df = pd.concat([df for df in results if df is not None],
                              ignore_index=True)
     except Exception as e:
