@@ -132,6 +132,9 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
 # keywords = ['material -sosial', 'HMETD']
 
 if __name__ == "__main__":
+
+    ##
+
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
     today_date = raw_today_data.strftime("%Y-%m-%d")

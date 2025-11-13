@@ -80,8 +80,10 @@ def scrape_data(sb, keyword, today_date, today_month_year):
                 print(f"{keyword} -- Loading page"
                       f"(attempt {retry_count + 1}/{max_retries})...")
                 sb.driver.set_page_load_timeout(60)
+                print(f"{keyword} -- Opening URL")
                 sb.driver.open("https://www.idx.co.id/id/perusahaan-tercatat"
                                "/keterbukaan-informasi/")
+                print(f"{keyword} -- Page opened, waiting for load...")
 
                 # sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
                 #         "/keterbukaan-informasi/")
@@ -254,7 +256,7 @@ def generate_message_string(df):
 
 def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
     """Process a single keyword in its own browser instance"""
-    with SB(uc=True, headless=True, xvfb=True,
+    with SB(uc=True, headless=False, xvfb=True,
             proxy=proxy_string,
             maximize=True) as sb:
         # Set up headers and user agent
