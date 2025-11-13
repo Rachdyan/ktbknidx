@@ -133,7 +133,20 @@ keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
 
 if __name__ == "__main__":
 
-    ##
+    # Check if proxy is working
+    print("Checking proxy connection...")
+    try:
+        import requests
+        proxies = {
+            'http': f'http://{proxy_string}',
+            'https': f'http://{proxy_string}'
+        }
+        response = requests.get('https://www.idx.co.id/',
+                                proxies=proxies, timeout=10)
+        print(f"Proxy working. Response code: {response.status_code}")
+    except Exception as e:
+        print(f"Proxy check failed: {e}")
+        print("Continuing anyway...")
 
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
