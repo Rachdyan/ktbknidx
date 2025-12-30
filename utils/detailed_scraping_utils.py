@@ -51,7 +51,7 @@ def upload_pdf_and_generate_summary(sb, df, drive, parent_folder_id,
             print(f"Downloading {link}")
             # sb.uc_open(link)
             sb.open(link)
-            sb.assert_downloaded_file(filename, timeout=60)
+            sb.assert_downloaded_file(filename, timeout=120)
             downloaded = True
             success_flag = True  # Mark success if downloaded
         except Exception as e:
