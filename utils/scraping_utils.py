@@ -70,10 +70,12 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         
         # Single attempt - if browser crashes, outer retry will restart it
         print(f"{keyword} -- Loading page...")
-        sb.driver.set_page_load_timeout(30)
+        sb.driver.set_page_load_timeout(60)
         print(f"{keyword} -- Opening URL")
-        sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
-                "/keterbukaan-informasi/")
+        #sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
+        #         "/keterbukaan-informasi/")
+        sb.activate_cdp_mode("https://www.idx.co.id/id/perusahaan-tercatat"
+                             "/keterbukaan-informasi/")
         print(f"{keyword} -- Page opened, waiting for load...")
 
         sb.sleep(10)
