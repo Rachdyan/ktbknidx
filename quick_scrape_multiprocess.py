@@ -161,6 +161,7 @@ if __name__ == "__main__":
     BOT_TOKEN = os.environ['BOT_TOKEN']
 
     TARGET_CHAT_ID = "1415309056"
+    TARGET_CHAT_ID = "-1003386345668"
 
     async def main():
         try:
