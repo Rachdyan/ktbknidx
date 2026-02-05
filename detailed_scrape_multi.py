@@ -305,6 +305,16 @@ if __name__ == "__main__":
         summary_string += f'{date_summary_result.n_document.tolist()[0]}'
         summary_string += '\n\n'
 
+        # Prepare DataFrame with time and message_string BEFORE sending
+        final_processed_df['time'] = pd.to_datetime(
+            final_df['time'], format='%H:%M:%S')\
+            .dt.time
+
+        final_processed_df['message_string'] = final_processed_df.apply(
+            lambda x: (f"<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')}"
+                       f" - <a href='{x['drive_link']}' target='_blank'>"
+                       f"{x['title']}</a>"), axis=1)
+
         # Consolidate all telegram operations into one async function
         async def send_all_telegram_messages():
             # Create bot instance inside async context
@@ -346,15 +356,6 @@ if __name__ == "__main__":
 
         # Run all telegram operations in single event loop
         asyncio.run(send_all_telegram_messages())
-
-        final_processed_df['time'] = pd.to_datetime(
-            final_df['time'], format='%H:%M:%S')\
-            .dt.time
-
-        final_processed_df['message_string'] = final_processed_df.apply(
-            lambda x: (f"<b>{x['stock']}</b> - {x['time'].strftime('%H:%M')}"
-                       f" - <a href='{x['drive_link']}' target='_blank'>"
-                       f"{x['title']}</a>"), axis=1)
 
         # Google Sheets update (removed duplicate async/telegram code)
 
