@@ -53,7 +53,9 @@ def upload_pdf_and_generate_summary(sb, df, drive, parent_folder_id,
                 print(f"Downloading {link} (attempt {retry+1}/{max_retries})")
                 sb.open(link)
                 sb.sleep(3)  # Wait for download to initiate
+                print(f"Asserrting downloaded {filename}...")
                 sb.assert_downloaded_file(filename, timeout=180)
+                print(f"✅ Successfully downloaded {filename}")
                 downloaded = True
                 success_flag = True  # Mark success if downloaded
                 break  # Exit retry loop on success

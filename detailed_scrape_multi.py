@@ -93,12 +93,14 @@ BOT_TOKEN = os.environ['BOT_TOKEN']
 
 TARGET_CHAT_ID = "1415309056"
 TARGET_CHAT_ID = "-1003386345668"
-bot = telegram.Bot(token=BOT_TOKEN)
+# Don't create bot instance here - create it inside async functions
 
 creds = gauth.credentials
 gc = None
 spreadsheet = None
 worksheet = None
+sheets_available = False
+
 try:
     gc = gspread.authorize(creds)
     print("Google Sheets client (gspread) initialized successfully.")
@@ -107,6 +109,7 @@ try:
     spreadsheet = gc.open_by_key(sheet_key)
 
     print(f"Successfully opened spreadsheet: '{spreadsheet.title}'")
+    sheets_available = True
 
 except gspread.exceptions.SpreadsheetNotFound:
     print("Error: Spreadsheet not found. \n"
@@ -156,6 +159,7 @@ if __name__ == "__main__":
     print("="*50)
 
     async def test_telegram():
+        bot = telegram.Bot(token=BOT_TOKEN)
         can_send = await test_bot_access(bot, TARGET_CHAT_ID)
         if not can_send:
             print("\n⚠️ WARNING: Bot cannot access the channel!")
@@ -299,9 +303,12 @@ if __name__ == "__main__":
         summary_string += f'{date_summary_result.n_document.tolist()[0]}'
         summary_string += '\n\n'
 
-        async def main():
+        # Consolidate all telegram operations into one async function
+        async def send_all_telegram_messages():
+            # Create bot instance inside async context
+            bot = telegram.Bot(token=BOT_TOKEN)
             try:
-                # Create a bot instance
+                # Send summary message
                 print("Attempting to send summary message to chat ID: "
                       f"{TARGET_CHAT_ID}")
 
@@ -313,7 +320,6 @@ if __name__ == "__main__":
                 print("Summary Message sent successfully!")
 
             except telegram.error.TelegramError as e:
-                # Handle potential errors
                 print(f"Telegram Error: {e}")
                 if "chat not found" in str(e):
                     print("Hint: Make sure the TARGET_CHAT_ID is correct"
@@ -321,8 +327,23 @@ if __name__ == "__main__":
                           "has started a chat with the bot first.")
                 elif "bot was blocked by the user" in str(e):
                     print("Hint: The target user has blocked this bot.")
+            # Send individual messages
+            for index, row in final_processed_df.iterrows():
+                print(f"Processing row {index}...")
 
-        asyncio.run(main())
+                success = await send_summary_message(row_data=row,
+                                                     bot=bot,
+                                                     chat_id=TARGET_CHAT_ID)
+
+                if not success:
+                    print(f"Failed to send message for row {index}."
+                          " Continuing...")
+
+                # Increase delay to avoid pool exhaustion
+                await asyncio.sleep(1)
+
+        # Run all telegram operations in single event loop
+        asyncio.run(send_all_telegram_messages())
 
         final_processed_df['time'] = pd.to_datetime(
             final_df['time'], format='%H:%M:%S')\
@@ -333,37 +354,29 @@ if __name__ == "__main__":
                        f" - <a href='{x['drive_link']}' target='_blank'>"
                        f"{x['title']}</a>"), axis=1)
 
-        async def main():
-            for index, row in final_processed_df.iterrows():
-                print(f"Processing row {index}...")
+        # Google Sheets update (removed duplicate async/telegram code)
 
-                # Use 'await' directly when calling the async function
-                success = await send_summary_message(row_data=row,
-                                                     bot=bot,
-                                                     chat_id=TARGET_CHAT_ID)
+        if sheets_available and spreadsheet is not None:
+            print("Updating Google Sheet..")
+            try:
+                export_to_sheets(spreadsheet=spreadsheet,
+                                 sheet_name='Data',
+                                 df=final_processed_df, mode='a')
 
-                if not success:
-                    print(f"Failed to send message for row {index}."
-                          "Continuing...")
-                # else:
-                #    print(f"Successfully sent for row {index}.") # Optional
+                export_to_sheets(spreadsheet=spreadsheet,
+                                 sheet_name='Date Summary',
+                                 df=date_summary_result, mode='a')
 
-                # Use 'await asyncio.sleep' directly for the non-blocking pause
-                await asyncio.sleep(0.5)
+                export_to_sheets(spreadsheet=spreadsheet,
+                                 sheet_name='Keyword Summary',
+                                 df=keyword_summary_result, mode='a')
 
-        asyncio.run(main())
-
-        print("Updating Google Sheet..")
-        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Data',
-                         df=final_processed_df, mode='a')
-
-        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Date Summary',
-                         df=date_summary_result, mode='a')
-
-        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Keyword Summary',
-                         df=keyword_summary_result, mode='a')
-
-        print("Finished Updating Sheet")
+                print("Finished Updating Sheet")
+            except Exception as e:
+                print(f"Error updating Google Sheets: {e}")
+                print("⚠️ Results were NOT saved to Google Sheets")
+        else:
+            print("⚠️ Skipping Google Sheets update (not available)")
 
     else:
         print(f"No result for {today_date}")
@@ -427,14 +440,24 @@ if __name__ == "__main__":
                 )
         )
 
-        print("Updating Google Sheet..")
-        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Data',
-                         df=final_processed_df, mode='a')
+        if sheets_available and spreadsheet is not None:
+            print("Updating Google Sheet..")
+            try:
+                export_to_sheets(spreadsheet=spreadsheet,
+                                 sheet_name='Data',
+                                 df=final_processed_df, mode='a')
 
-        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Date Summary',
-                         df=date_summary_result, mode='a')
+                export_to_sheets(spreadsheet=spreadsheet,
+                                 sheet_name='Date Summary',
+                                 df=date_summary_result, mode='a')
 
-        export_to_sheets(spreadsheet=spreadsheet, sheet_name='Keyword Summary',
-                         df=keyword_summary_result, mode='a')
+                export_to_sheets(spreadsheet=spreadsheet,
+                                 sheet_name='Keyword Summary',
+                                 df=keyword_summary_result, mode='a')
 
-        print("Finished Updating Sheet")
+                print("Finished Updating Sheet")
+            except Exception as e:
+                print(f"Error updating Google Sheets: {e}")
+                print("⚠️ Results were NOT saved to Google Sheets")
+        else:
+            print("⚠️ Skipping Google Sheets update (not available)")
