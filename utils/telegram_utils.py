@@ -1,6 +1,54 @@
 import telegram
 
 
+async def test_bot_access(bot, chat_id):
+    """
+    Tests if the bot can access and send messages to the specified
+    chat/channel.
+
+    Args:
+        bot (telegram.Bot): An initialized python-telegram-bot Bot instance.
+        chat_id (int | str): The target chat ID to test.
+
+    Returns:
+        bool: True if bot can access the chat, False otherwise.
+    """
+    try:
+        # Get bot info first
+        bot_info = await bot.get_me()
+        bot_id = bot_info.id
+        # Try to get chat information
+        chat = await bot.get_chat(chat_id)
+        print(f"✓ Bot can access chat: {chat.title} (Type: {chat.type})")
+
+        # For channels, check if bot is an admin
+        if chat.type in ['channel', 'supergroup']:
+            try:
+                admins = await bot.get_chat_administrators(chat_id)
+                bot_is_admin = any(admin.user.id == bot_id
+                                   for admin in admins)
+                if bot_is_admin:
+                    print(f"✓ Bot is an administrator in {chat.title}")
+                else:
+                    print(f"✗ Bot is NOT an administrator in {chat.title}")
+                    print("  → Add the bot as an admin with "
+                          "'Post Messages' permission")
+                    return False
+            except telegram.error.TelegramError as e:
+                print(f"✗ Cannot check admin status: {e}")
+                return False
+
+        return True
+    except telegram.error.TelegramError as e:
+        print(f"✗ Bot cannot access chat {chat_id}: {e}")
+        if "chat not found" in str(e).lower():
+            print("  → Make sure:")
+            print("    1. The chat ID is correct")
+            print("    2. The bot has been added to the channel/group")
+            print("    3. The bot is an administrator (for channels)")
+        return False
+
+
 async def send_summary_message(row_data, bot, chat_id):
     """
     Formats a message from row_data and sends it via the Telegram bot.

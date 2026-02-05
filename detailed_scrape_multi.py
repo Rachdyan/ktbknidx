@@ -20,7 +20,7 @@ from utils.scraping_utils import process_keyword_multi
 from utils.detailed_scraping_utils import generate_pdf_name, \
     upload_pdf_and_generate_summary_multi
 from utils.google_utils import export_to_sheets
-from utils.telegram_utils import send_summary_message
+from utils.telegram_utils import send_summary_message, test_bot_access
 
 load_dotenv(override=True)
 
@@ -148,6 +148,28 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Proxy check failed: {e}")
         print("Continuing anyway...")
+
+    # Test bot access to channel
+    print("\n" + "="*50)
+    print("Testing Telegram bot access...")
+    print("="*50)
+
+    async def test_telegram():
+        can_send = await test_bot_access(bot, TARGET_CHAT_ID)
+        if not can_send:
+            print("\n⚠️ WARNING: Bot cannot access the channel!")
+            print("Please add the bot to the channel as an admin "
+                  "before continuing.")
+            return False
+        return True
+
+    bot_can_send = asyncio.run(test_telegram())
+
+    if not bot_can_send:
+        print("\n❌ Exiting: Fix Telegram bot permissions first")
+        exit(1)
+
+    print("="*50 + "\n")
 
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
