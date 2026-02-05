@@ -91,6 +91,7 @@ client = OpenAI(
 BOT_TOKEN = os.environ['BOT_TOKEN']
 
 TARGET_CHAT_ID = "1415309056"
+TARGET_CHAT_ID = "-1003386345668"
 bot = telegram.Bot(token=BOT_TOKEN)
 
 creds = gauth.credentials

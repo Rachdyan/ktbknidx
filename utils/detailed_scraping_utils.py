@@ -46,18 +46,28 @@ def upload_pdf_and_generate_summary(sb, df, drive, parent_folder_id,
         filename = all_filenames[i]
         print(f"Processing file {i+1} of {len(all_links)}: {filename}")
         downloaded = False
+        max_retries = 2
 
-        try:
-            print(f"Downloading {link}")
-            # sb.uc_open(link)
-            sb.open(link)
-            sb.assert_downloaded_file(filename, timeout=120)
-            downloaded = True
-            success_flag = True  # Mark success if downloaded
-        except Exception as e:
-            print(f"⚠️ Failed to download {filename}: {str(e)}")
-            sb.delete_downloaded_file_if_present(filename)  # Clean up
-            continue  # Skip to next file
+        for retry in range(max_retries):
+            try:
+                print(f"Downloading {link} (attempt {retry+1}/{max_retries})")
+                sb.open(link)
+                sb.sleep(3)  # Wait for download to initiate
+                sb.assert_downloaded_file(filename, timeout=180)
+                downloaded = True
+                success_flag = True  # Mark success if downloaded
+                break  # Exit retry loop on success
+            except Exception as e:
+                print(f"⚠️ Attempt {retry+1} failed "
+                      f"to download {filename}: {str(e)}")
+                sb.delete_downloaded_file_if_present(filename)  # Clean up
+                if retry < max_retries - 1:
+                    print(f"Retrying download for {filename}...")
+                    sb.sleep(2)
+                else:
+                    print(f"❌ All {max_retries} attempts "
+                          f"failed for {filename}")
+                    continue  # Skip to next file
 
         if downloaded:
             try:
@@ -176,7 +186,12 @@ def upload_pdf_and_generate_summary_multi(row, proxy_string,
 
         with SB(uc=True, headless=True, xvfb=True,
                 proxy=proxy_string,
-                maximize=True, external_pdf=True) as sb:
+                maximize=True, external_pdf=True,
+                page_load_strategy="normal",
+                timeout_multiplier=0.5) as sb:
+            # Set timeouts
+            sb.driver.set_page_load_timeout(30)
+            sb.driver.set_script_timeout(30)
             # Configure browser settings
             sb.driver.execute_cdp_cmd(
                     "Network.setExtraHTTPHeaders",

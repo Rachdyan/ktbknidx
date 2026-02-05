@@ -79,7 +79,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
             try:
                 print(f"{keyword} -- Loading page"
                       f"(attempt {retry_count + 1}/{max_retries})...")
-                sb.driver.set_page_load_timeout(60)
+                sb.driver.set_page_load_timeout(30)
                 print(f"{keyword} -- Opening URL")
                 sb.driver.open("https://www.idx.co.id/id/perusahaan-tercatat"
                                "/keterbukaan-informasi/")
@@ -259,7 +259,9 @@ def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
     """Process a single keyword in its own browser instance"""
     with SB(uc=True, headless=False, xvfb=True,
             proxy=proxy_string,
-            maximize=True) as sb:
+            maximize=True,
+            page_load_strategy="normal",
+            timeout_multiplier=0.5) as sb:
         # Set up headers and user agent
         sb.driver.execute_cdp_cmd(
                 "Network.setExtraHTTPHeaders",
@@ -295,5 +297,13 @@ def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
             )
         sb.driver.execute_script("Object.defineProperty(navigator, \
                                  'webdriver',{get: () => undefined})")
+        sb.driver.set_script_timeout(30)
 
-        return scrape_data(sb, keyword, today_date, today_month_year)
+        try:
+            return scrape_data(sb, keyword, today_date, today_month_year)
+        finally:
+            # Ensure proper cleanup
+            try:
+                sb.driver.quit()
+            except Exception as e:
+                print(f"Error during cleanup for {keyword}: {e}")
