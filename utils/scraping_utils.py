@@ -78,10 +78,10 @@ def scrape_data(sb, keyword, today_date, today_month_year):
                              "/keterbukaan-informasi/")
         print(f"{keyword} -- Page opened, waiting for load...")
 
-        sb.sleep(10)
+        sb.sleep(7)
 
         sb.refresh()
-        sb.sleep(10)
+        sb.sleep(7)
 
         # Check if page loaded successfully by waiting for a key element
         sb.wait_for_element_present('#FilterSearch', timeout=10)
