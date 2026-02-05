@@ -80,8 +80,8 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         sb.sleep(7)
 
-        sb.refresh()
-        sb.sleep(7)
+        #sb.refresh()
+        #sb.sleep(7)
 
         # Check if page loaded successfully by waiting for a key element
         sb.wait_for_element_present('#FilterSearch', timeout=10)
@@ -91,12 +91,12 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         # html = sb.get_page_source()
         # print(html)
-        sb.wait_for_element_present('#FilterSearch')
+        sb.wait_for_element_present('#FilterSearch', timeout=10)
         sb.click('#FilterSearch')
         sb.send_keys('#FilterSearch', keyword)
 
         sb.sleep(5)
-        sb.wait_for_element_present("input[name='date']")
+        sb.wait_for_element_present("input[name='date']", timeout=10)
         sb.click("input[name='date']")
         sb.sleep(5)
 
@@ -114,7 +114,7 @@ def scrape_data(sb, keyword, today_date, today_month_year):
         sb.sleep(5)
 
         print(f"{keyword} -- Clicking Date")
-        sb.wait_for_element_present(f"td[title = '{today_date}']")
+        sb.wait_for_element_present(f"td[title = '{today_date}']", timeout=10)
         today_date_button = sb.find_element(f"td[title = '{today_date}']")
         today_date_button.click()
         today_date_button.click()

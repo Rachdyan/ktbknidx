@@ -201,14 +201,16 @@ if __name__ == "__main__":
         results = []
         for i, async_result in enumerate(async_results):
             try:
-                result = async_result.get(timeout=300)
+                result = async_result.get(timeout=240)
                 results.append(result)
                 print(f"Successfully processed keyword: {keywords[i]}")
             except multiprocessing.TimeoutError:
                 print(f"Timeout: Keyword '{keywords[i]}' took too long"
                       " - skipping")
+                results.append(None)  # Add None to keep index alignment
             except Exception as e:
                 print(f"Error processing keyword '{keywords[i]}': {e}")
+                results.append(None)
 
     print("Processing completed.")
 
