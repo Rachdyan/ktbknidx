@@ -67,46 +67,20 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
     try:
         print(f"Scraping {keyword}....")
-        # sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
-        #         "/keterbukaan-informasi/")
-        # sb.sleep(4)
-        # sb.refresh()
-        # sb.sleep(4)
+        
+        # Single attempt - if browser crashes, outer retry will restart it
+        print(f"{keyword} -- Loading page...")
+        sb.driver.set_page_load_timeout(30)
+        print(f"{keyword} -- Opening URL")
+        sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
+                "/keterbukaan-informasi/")
+        print(f"{keyword} -- Page opened, waiting for load...")
 
-        max_retries = 3
-        retry_count = 0
-        page_loaded = False
+        sb.sleep(5)
 
-        while retry_count < max_retries and not page_loaded:
-            try:
-                print(f"{keyword} -- Loading page"
-                      f"(attempt {retry_count + 1}/{max_retries})...")
-                sb.driver.set_page_load_timeout(30)
-                print(f"{keyword} -- Opening URL")
-                sb.driver.open("https://www.idx.co.id/id/perusahaan-tercatat"
-                               "/keterbukaan-informasi/")
-                print(f"{keyword} -- Page opened, waiting for load...")
-
-                # sb.open("https://www.idx.co.id/id/perusahaan-tercatat"
-                #         "/keterbukaan-informasi/")
-
-                sb.sleep(5)
-                # sb.refresh()
-                # sb.sleep(5)
-
-                # Check if page loaded successfully by waiting for a key
-                sb.wait_for_element_present('#FilterSearch', timeout=10)
-                page_loaded = True
-                print(f"{keyword} -- Page loaded successfully")
-            except Exception as e:
-                retry_count += 1
-                print(f"{keyword} -- Failed to load page"
-                      f"(attempt {retry_count}/{max_retries}): {e}")
-                if retry_count >= max_retries:
-                    print(f"{keyword} -- Max retries reached. Unable to load"
-                          f"page for keyword '{keyword}'")
-                    return None
-                sb.sleep(4)  # Wait before retrying
+        # Check if page loaded successfully by waiting for a key element
+        sb.wait_for_element_present('#FilterSearch', timeout=10)
+        print(f"{keyword} -- Page loaded successfully")
 
         print(f"{keyword} -- Clicking Search Filter")
 
@@ -324,8 +298,15 @@ def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
 
                 try:
                     result = scrape_data(sb, keyword, today_date, today_month_year)
-                    print(f"{keyword} -- ✅ Success on attempt {attempt + 1}")
-                    return result
+                    
+                    # Check if scraping was successful
+                    if result is not None and not result.empty:
+                        print(f"{keyword} -- ✅ Success on attempt {attempt + 1}")
+                        return result
+                    else:
+                        # scrape_data returned None or empty DataFrame
+                        raise Exception("Scraping returned no data")
+                        
                 finally:
                     # Ensure proper cleanup
                     try:
@@ -339,7 +320,8 @@ def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
             
             # Check if it's a connection/resource error worth retrying
             if any(x in error_msg for x in ["Connection refused", "Max retries exceeded", 
-                                             "Failed to establish", "Session not created"]):
+                                             "Failed to establish", "Session not created",
+                                             "Scraping returned no data"]):
                 if attempt < max_retries - 1:
                     wait_time = (attempt + 1) * 3  # 3s, 6s, 9s
                     print(f"{keyword} -- ⚠️ Attempt {attempt + 1} failed. "
@@ -353,5 +335,5 @@ def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
                 break
     
     # All retries exhausted
-    print(f"{keyword} -- Returning None after all retry attempts")
+    print(f"{keyword} -- ❌ All attempts failed, returning None")
     return None
