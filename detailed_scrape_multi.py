@@ -30,6 +30,7 @@ proxy_host = os.environ['PROXY_HOST']
 proxy_port = os.environ['PROXY_PORT']
 
 proxy_string = f"{user}:{password}@{proxy_host}:{proxy_port}"
+# proxy_string = None
 
 private_key_id = os.environ['SA_PRIVKEY_ID']
 sa_client_email = os.environ['SA_CLIENTMAIL']
@@ -186,6 +187,8 @@ if __name__ == "__main__":
     # Process keywords in parallel
     # with multiprocessing.Pool(processes=4) as pool:
     #     results = pool.starmap(process_keyword_multi, args)
+
+    print("Starting multiprocessing for keyword scraping...")
 
     with multiprocessing.Pool(processes=4) as pool:
         async_results = [pool.apply_async(process_keyword_multi, arg)
