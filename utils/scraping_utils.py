@@ -182,6 +182,10 @@ def scrape_data(sb, keyword, today_date, today_month_year):
 
         return result_df
 
+    except IndexError as e:
+        # This happens when there's no data for the keyword/date combination
+        print(f"{keyword} -- No data available (empty results): {e}")
+        return pd.DataFrame()  # Return empty DataFrame, not None
     except Exception as e:
         print(f"Error scraping data for keyword '{keyword}': {e}")
         return None  # Indicate failure
@@ -305,12 +309,16 @@ def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
                     result = scrape_data(sb, keyword, today_date, today_month_year)
                     
                     # Check if scraping was successful
-                    if result is not None and not result.empty:
-                        print(f"{keyword} -- ✅ Success on attempt {attempt + 1}")
+                    if result is not None:
+                        # None = error, empty DataFrame = no data (valid)
+                        if result.empty:
+                            print(f"{keyword} -- ✅ Success (no data available for this keyword/date)")
+                        else:
+                            print(f"{keyword} -- ✅ Success: {len(result)} records found")
                         return result
                     else:
-                        # scrape_data returned None or empty DataFrame
-                        raise Exception("Scraping returned no data")
+                        # scrape_data returned None = actual error
+                        raise Exception("Scraping failed with error")
                         
                 finally:
                     # Ensure proper cleanup
@@ -324,9 +332,10 @@ def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
             error_msg = str(e)
             
             # Check if it's a connection/resource error worth retrying
+            # Don't retry on IndexError (no data) - that's a valid result
             if any(x in error_msg for x in ["Connection refused", "Max retries exceeded", 
                                              "Failed to establish", "Session not created",
-                                             "Scraping returned no data"]):
+                                             "Scraping failed with error"]):
                 if attempt < max_retries - 1:
                     wait_time = (attempt + 1) * 3  # 3s, 6s, 9s
                     print(f"{keyword} -- ⚠️ Attempt {attempt + 1} failed. "
