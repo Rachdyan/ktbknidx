@@ -205,7 +205,7 @@ def upload_pdf_and_generate_summary_multi(row, proxy_string,
                 proxy=proxy_string,
                 maximize=True, external_pdf=True,
                 page_load_strategy="normal",
-                chromium_arg=",".join(chrome_options),
+                # chromium_arg=",".join(chrome_options),
                 timeout_multiplier=0.5) as sb:
             # Set timeouts
             sb.driver.set_page_load_timeout(30)

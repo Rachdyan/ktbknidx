@@ -76,7 +76,10 @@ def scrape_data(sb, keyword, today_date, today_month_year):
                 "/keterbukaan-informasi/")
         print(f"{keyword} -- Page opened, waiting for load...")
 
-        sb.sleep(5)
+        sb.sleep(10)
+
+        sb.refresh()
+        sb.sleep(10)
 
         # Check if page loaded successfully by waiting for a key element
         sb.wait_for_element_present('#FilterSearch', timeout=10)
@@ -257,7 +260,7 @@ def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
                     proxy=proxy_string,
                     maximize=True,
                     page_load_strategy="normal",
-                    chromium_arg=",".join(chrome_options),
+                    #chromium_arg=",".join(chrome_options),
                     timeout_multiplier=0.5) as sb:
                 # Set up headers and user agent
                 sb.driver.execute_cdp_cmd(
