@@ -176,6 +176,12 @@ def upload_pdf_and_generate_summary_multi(row, proxy_string,
                                           parent_folder_id,
                                           scope, deepseek_api_key):
     """Process a single row with its own browser instance and services"""
+    import time
+    import random
+
+    # Staggered startup for PDF processing
+    time.sleep(random.uniform(0.5, 2.0))
+
     try:
         # Reinitialize services inside the process
         gauth = GoogleAuth()
@@ -186,10 +192,20 @@ def upload_pdf_and_generate_summary_multi(row, proxy_string,
         client = OpenAI(api_key=deepseek_api_key,
                         base_url="https://api.deepseek.com")
 
+        # Memory-optimized Chrome for PDF processing
+        chrome_options = [
+            "--disable-dev-shm-usage",
+            "--no-sandbox",
+            "--disable-gpu",
+            "--disable-software-rasterizer",
+            "--js-flags=--max-old-space-size=512",
+        ]
+
         with SB(uc=True, headless=True, xvfb=True,
                 proxy=proxy_string,
                 maximize=True, external_pdf=True,
                 page_load_strategy="normal",
+                chromium_arg=",".join(chrome_options),
                 timeout_multiplier=0.5) as sb:
             # Set timeouts
             sb.driver.set_page_load_timeout(30)

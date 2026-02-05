@@ -1,6 +1,8 @@
 from seleniumbase import SB
 from bs4 import BeautifulSoup
 import pandas as pd
+import time
+import random
 
 
 def convert_from_info_div(info_div, keyword):
@@ -257,53 +259,99 @@ def generate_message_string(df):
 
 def process_keyword_multi(keyword, today_date, today_month_year, proxy_string):
     """Process a single keyword in its own browser instance"""
-    with SB(uc=True, headless=False, xvfb=True,
-            proxy=proxy_string,
-            maximize=True,
-            page_load_strategy="normal",
-            timeout_multiplier=0.5) as sb:
-        # Set up headers and user agent
-        sb.driver.execute_cdp_cmd(
-                "Network.setExtraHTTPHeaders",
-                {
-                    "headers": {
-                        'Accept': 'text/html,application/xhtml+xml,application\
-                            /xml;q=0.9,image/avif,image/webp,image/apng,*/*;\
-                                q=0.8,application/signed-exchange;v=b3;q=0.7',
-                        'Accept-Encoding': 'gzip, deflate, br, zstd',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Cache-Control': "no-cache",
-                        'Pragma': "no-cache",
-                        'Priority': "u=0, i",
-                        'Sec-Ch-Ua': '"Chromium";v="134", \
-                            "Not:A-Brand";v="24","Google Chrome";v="134"',
-                        'Sec-Ch-Mobile': "?0",
-                        'Sec-Ch-Ua-Platform': '"macOS"',
-                        'Sec-Fetch-Dest': "document",
-                        'Sec-Fetch-Mode': "navigate",
-                        'Sec-Fetch-User': "?1",
-                        'Upgrade-Insecure-Requests': '1',
-                    }
-                }
-            )
-
-        sb.driver.execute_cdp_cmd(
-                "Network.setUserAgentOverride",
-                {
-                    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X \
-                        10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) \
-                            Chrome/134.0.0.0 Safari/537.36"
-                },
-            )
-        sb.driver.execute_script("Object.defineProperty(navigator, \
-                                 'webdriver',{get: () => undefined})")
-        sb.driver.set_script_timeout(30)
-
+    
+    # Staggered startup: random delay to prevent simultaneous browser launches
+    startup_delay = random.uniform(0.5, 2.5)
+    time.sleep(startup_delay)
+    
+    max_retries = 3
+    last_error = None
+    
+    for attempt in range(max_retries):
         try:
-            return scrape_data(sb, keyword, today_date, today_month_year)
-        finally:
-            # Ensure proper cleanup
-            try:
-                sb.driver.quit()
-            except Exception as e:
-                print(f"Error during cleanup for {keyword}: {e}")
+            # Memory-optimized Chrome arguments for 4 parallel instances
+            chrome_options = [
+                "--disable-dev-shm-usage",      # Use /tmp instead of /dev/shm
+                "--no-sandbox",                  # Required for containerized
+                "--disable-gpu",                 # Disable GPU hardwar
+                "--disable-software-rasterizer", # Reduce memory usage
+                "--disable-extensions",          # Disable extensions
+                "--js-flags=--max-old-space-size=512",
+            ]
+            
+            with SB(uc=True, headless=False, xvfb=True,
+                    proxy=proxy_string,
+                    maximize=True,
+                    page_load_strategy="normal",
+                    chromium_arg=",".join(chrome_options),
+                    timeout_multiplier=0.5) as sb:
+                # Set up headers and user agent
+                sb.driver.execute_cdp_cmd(
+                        "Network.setExtraHTTPHeaders",
+                        {
+                            "headers": {
+                                'Accept': 'text/html,application/xhtml+xml,application\
+                                    /xml;q=0.9,image/avif,image/webp,image/apng,*/*;\
+                                        q=0.8,application/signed-exchange;v=b3;q=0.7',
+                                'Accept-Encoding': 'gzip, deflate, br, zstd',
+                                'Accept-Language': 'en-US,en;q=0.9',
+                                'Cache-Control': "no-cache",
+                                'Pragma': "no-cache",
+                                'Priority': "u=0, i",
+                                'Sec-Ch-Ua': '"Chromium";v="134", \
+                                    "Not:A-Brand";v="24","Google Chrome";v="134"',
+                                'Sec-Ch-Mobile': "?0",
+                                'Sec-Ch-Ua-Platform': '"macOS"',
+                                'Sec-Fetch-Dest': "document",
+                                'Sec-Fetch-Mode': "navigate",
+                                'Sec-Fetch-User': "?1",
+                                'Upgrade-Insecure-Requests': '1',
+                            }
+                        }
+                    )
+
+                sb.driver.execute_cdp_cmd(
+                        "Network.setUserAgentOverride",
+                        {
+                            "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X \
+                                10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) \
+                                    Chrome/134.0.0.0 Safari/537.36"
+                        },
+                    )
+                sb.driver.execute_script("Object.defineProperty(navigator, \
+                                         'webdriver',{get: () => undefined})")
+                sb.driver.set_script_timeout(30)
+
+                try:
+                    result = scrape_data(sb, keyword, today_date, today_month_year)
+                    print(f"{keyword} -- ✅ Success on attempt {attempt + 1}")
+                    return result
+                finally:
+                    # Ensure proper cleanup
+                    try:
+                        sb.driver.quit()
+                    except Exception as e:
+                        print(f"Error during cleanup for {keyword}: {e}")
+        
+        except Exception as e:
+            last_error = e
+            error_msg = str(e)
+            
+            # Check if it's a connection/resource error worth retrying
+            if any(x in error_msg for x in ["Connection refused", "Max retries exceeded", 
+                                             "Failed to establish", "Session not created"]):
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 3  # 3s, 6s, 9s
+                    print(f"{keyword} -- ⚠️ Attempt {attempt + 1} failed. "
+                          f"Retrying in {wait_time}s... ({error_msg[:100]})")
+                    time.sleep(wait_time)
+                else:
+                    print(f"{keyword} -- ❌ Failed after {max_retries} attempts: {error_msg[:200]}")
+            else:
+                # Non-recoverable error, don't retry
+                print(f"{keyword} -- ❌ Non-recoverable error: {error_msg[:200]}")
+                break
+    
+    # All retries exhausted
+    print(f"{keyword} -- Returning None after all retry attempts")
+    return None

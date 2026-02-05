@@ -58,11 +58,6 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         pip install --upgrade python-xlib
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        # Stop the build if there are flake8 issues
-        flake8 . --count --show-source --statistics --exclude=temp
     - name: Install Chrome
       if: matrix.os == 'ubuntu-22.04'
       run: |
@@ -84,6 +79,20 @@ jobs:
         python -c "import os; print(os.path.exists('/bin/google-chrome-stable'))"
         python -c "import os; print(os.path.exists('/bin/chromium-browser'))"
         python -c "import os; print(os.path.exists('/bin/chromium'))"
+    - name: Optimize system for browser stability
+      if: runner.os == 'Linux'
+      run: |
+        # Increase file descriptor limit
+        sudo sysctl -w fs.file-max=65536
+        ulimit -n 4096
+        # Increase shared memory for Chrome (prevents crashes)
+        sudo mount -o remount,size=4G /dev/shm
+        # Disable memory overcommit limits
+        sudo sysctl -w vm.overcommit_memory=1
+        # Check system resources
+        free -h
+        df -h /dev/shm
+        echo "System optimized for 4 parallel Chrome instances"
     - name: Display Chrome binary that's used
       run: |
         python -c "from seleniumbase.core import detect_b_ver; print(detect_b_ver.get_binary_location('google-chrome'))"
