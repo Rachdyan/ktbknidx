@@ -88,7 +88,7 @@ client = OpenAI(
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
 
-TARGET_CHAT_ID = "1415309056"
+TARGET_CHAT_ID = "-1003854188399"
 bot = telegram.Bot(token=BOT_TOKEN)
 
 creds = gauth.credentials
@@ -118,13 +118,11 @@ except Exception as e:
     exit(1)
 
 
-keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
-            'Penandatanganan', 'Penambahan Modal', 'Insidentil',
-            'Pengambilalihan', 'perubahan  -kepemilikan -audit',
-            'luar biasa -iklan', 'PMHMETD', 'negoisasi', 'media massa',
-            'pengendali', 'penggabungan', 'peningkatan modal',
-            'kontrak penting', 'restrukturisasi', 'pendirian entitas',
-            'prospektus', 'tender', 'anak usaha']
+keywords = ['AMMN', 'ANTM', 'INCO', 'NCKL',
+            'BRMS', 'BUMI', 'DEWA', 'ENRG',
+            'BRPT', 'TPIA', 'BREN', 'ELSA',
+            'ADRO', 'PTBA', 'AADI', 'MDKA',
+            'MBMA', 'EMAS', 'INKP', 'BULL']
 
 # keywords = ['Pengambilalihan', 'penandatanganan']
 
