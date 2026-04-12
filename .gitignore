@@ -1,4 +1,5 @@
 .env
+.worktrees/
 test.py
 notebook_test
 downloaded_files
