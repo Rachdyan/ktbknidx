@@ -176,7 +176,7 @@ if __name__ == "__main__":
     # Calculate date-related variables
     raw_today_data = dt.now(pytz.timezone('Asia/Jakarta'))
     today_date = raw_today_data.strftime("%Y-%m-%d")
-    today_date = '2026-04-10'
+    #today_date = '2026-04-10'
     today_month_year = raw_today_data.strftime("%b %Y")
     # today_month_year = 'June 2025'
 
