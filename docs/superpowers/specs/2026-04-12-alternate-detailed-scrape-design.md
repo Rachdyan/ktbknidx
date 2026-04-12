@@ -78,7 +78,7 @@ The selected design is to keep the alternate scraper implementation on a separat
 
 Add a new workflow file on `main`, for example:
 
-`/.github/workflows/detailed_scrape_multiprocess_alt.yml`
+`/.github/workflows/detailed_scrape_multiprocess_mrsd.yml`
 
 This workflow will:
 
@@ -156,7 +156,7 @@ Before enabling the schedule:
 
 ## Implementation Notes
 
-- Use a clear branch name such as `detailed-scrape-alt`.
-- Use a clear workflow name such as `Detailed Scrape Multiprocess Alt`.
+- Use a clear branch name such as `detailed-scrape-mrsd`.
+- Use a clear workflow name such as `Detailed Scrape Multiprocess Mrsd`.
 - Keep comments in the workflow that map UTC cron to WIB to reduce scheduling mistakes later.
 - Avoid changing unrelated workflow behavior while introducing the alternate flow.
