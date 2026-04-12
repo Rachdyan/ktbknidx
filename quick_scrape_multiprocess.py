@@ -22,13 +22,11 @@ proxy_host = os.environ['PROXY_HOST']
 proxy_port = os.environ['PROXY_PORT']
 proxy_string = f"{user}:{password}@{proxy_host}:{proxy_port}"
 
-keywords = ['material -sosial', 'HMETD', 'aksi korporasi -dividen',
-            'Penandatanganan', 'Penambahan Modal', 'Insidentil',
-            'Pengambilalihan', 'perubahan  -kepemilikan -audit',
-            'luar biasa -iklan', 'PMHMETD', 'negoisasi', 'media massa',
-            'pengendali', 'penggabungan', 'peningkatan modal',
-            'kontrak penting', 'restrukturisasi', 'pendirian entitas',
-            'prospektus', 'tender', 'anak usaha']
+keywords = ['AMMN', 'ANTM', 'INCO', 'NCKL',
+            'BRMS', 'BUMI', 'DEWA', 'ENRG',
+            'BRPT', 'TPIA', 'BREN', 'ELSA',
+            'ADRO', 'PTBA', 'AADI', 'MDKA',
+            'MBMA', 'EMAS', 'INKP', 'BULL']
 
 if __name__ == "__main__":
     # Calculate date-related variables
@@ -160,8 +158,7 @@ if __name__ == "__main__":
 
     BOT_TOKEN = os.environ['BOT_TOKEN']
 
-    TARGET_CHAT_ID = "1415309056"
-    TARGET_CHAT_ID = "-1003386345668"
+    TARGET_CHAT_ID = "-1003854188399"
 
     async def main():
         try:
