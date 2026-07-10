@@ -1,14 +1,22 @@
 name: Detailed Scrape Multiprocess Mrsd
 on:
   schedule:
+    # # 22:45 WIB (Asia/Jakarta)
+    # - cron: '45 15 * * *'
+    # # 07:55 WIB (Asia/Jakarta)
+    # - cron: '55 0 * * *'
+    # # 12:30 WIB (Asia/Jakarta)
+    # - cron: '30 5 * * *'
+    # # 15:00 WIB (Asia/Jakarta)
+    # - cron: '0 8 * * *'
     # 22:45 WIB (Asia/Jakarta)
-    - cron: '45 15 * * *'
+    - cron: '45 14 * * *'
     # 07:55 WIB (Asia/Jakarta)
-    - cron: '55 0 * * *'
+    - cron: '55 23 * * *'
     # 12:30 WIB (Asia/Jakarta)
-    - cron: '30 5 * * *'
+    - cron: '30 4 * * *'
     # 15:00 WIB (Asia/Jakarta)
-    - cron: '0 8 * * *'
+    - cron: '0 7 * * *'
   workflow_dispatch:
 #  // push:
 #     branches: [ master ]
